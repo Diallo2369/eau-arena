@@ -593,3 +593,7 @@ a.hb-row:hover .hb-n{text-decoration:underline}
 .prose.legal h2{font-size:22px;margin-top:8px}
 .prose.legal p{font-size:16.5px}
 .prose.legal a{color:var(--ink)}
+/* La liste de suggestions déborde du bandeau de recherche : le bandeau ne coupe plus son contenu,
+   seul le motif d'eau (pseudo-éléments débordant de 900px) reste découpé à ses bords. */
+.deep.hero-s{overflow:visible;z-index:5}
+.deep.hero-s::before,.deep.hero-s::after{clip-path:inset(900px)}
