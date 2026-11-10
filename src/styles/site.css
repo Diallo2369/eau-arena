@@ -583,3 +583,6 @@ a.hb-row:hover .hb-n{text-decoration:underline}
 .sugg .n b{font-size:17px;font-weight:600}
 .sugg .n span{font-size:13.5px;color:var(--ink-2)}
 .sugg .gr{width:38px;height:38px;font-size:20px;border-radius:11px}
+.ad{margin-block:32px;padding:12px;border:1px solid var(--line);border-radius:18px;background:var(--card);min-height:120px}
+.rlist .ad{margin-block:4px}
+.ad-l{display:block;font-size:12px;font-weight:600;color:var(--ink-2);margin:0 0 8px 4px}

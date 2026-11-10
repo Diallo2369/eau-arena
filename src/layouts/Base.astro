@@ -4,6 +4,7 @@ import "@fontsource-variable/schibsted-grotesk/index.css";
 import "../styles/site.css";
 import { SITE_NAME, SITE_URL, INDEXABLE } from "../lib/site.js";
 import { load } from "../lib/data.js";
+import { ADS } from "../lib/ads.js";
 
 const { title, description, page, pageData = null, noindex = false } = Astro.props;
 const { meta, index } = load();
@@ -30,6 +31,7 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   {SITE_URL && <meta property="og:image" content={SITE_URL + "/og.png"} />}
   <meta name="theme-color" content="#0A3554" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  {ADS.enabled && ADS.client && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADS.client}`} crossorigin="anonymous"></script>}
 </head>
 <body data-page={page}>
   <a class="skip" href="#app">Aller au contenu</a>

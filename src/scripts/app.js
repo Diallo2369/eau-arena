@@ -110,7 +110,12 @@ document.addEventListener("pointerover", warm, { passive: true });
 document.addEventListener("focusin", warm);
 
 // ---------- Comportements de chaque page ----------
+// Publicité : remplit les emplacements présents dans la page (rien si la publicité est désactivée)
+function fillAds() {
+  $$("ins.adsbygoogle:not([data-adsbygoogle-status])").forEach(() => { try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {} });
+}
 function enter(page) {
+  fillAds();
   app.classList.remove("anim"); void app.offsetWidth; app.classList.add("anim");
   if (page === "home" || page === "city") bindSearch();
   if (page === "city") { bindCity(); fill(); }
@@ -178,7 +183,7 @@ async function bindRank() {
   if (!idx) return;
   const redraw = (full) => {
     if (full) { app.innerHTML = renderRanking(idx, boot.meta, deps, rankSt); app.classList.remove("anim"); bindRank(); return; }
-    $("#rlist").innerHTML = rankRows(rankFilter(idx, rankSt), rankSt); bindMore();
+    $("#rlist").innerHTML = rankRows(rankFilter(idx, rankSt), rankSt); bindMore(); fillAds();
     $$("[data-f]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.f === rankSt.L));
     $("[data-sort]").firstChild.textContent = rankSt.desc ? "Meilleures d'abord" : "Moins bonnes d'abord";
   };

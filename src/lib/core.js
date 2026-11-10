@@ -1,3 +1,5 @@
+import { adSlot, NO_COOKIE } from "./ads.js";
+
 // Calculs et rendu partagés entre la construction (Astro) et le navigateur.
 // Un seul endroit à modifier : chaque page est générée à la construction avec ces fonctions,
 // puis le navigateur les réutilise pour changer de page sans appel au serveur.
@@ -168,7 +170,7 @@ export function renderHome(popular) {
         <li class="step"><span class="n">3</span><div class="vis vis-tubes" aria-hidden="true"><i style="--h:20%"></i><i style="--h:62%" class="w"></i><i style="--h:35%"></i><i style="--h:12%"></i></div><h3>Comprenez le détail</h3><p>Microbes, nitrates, pesticides, polluants éternels : chaque critère comparé à sa limite de santé.</p></li>
       </ol>
     </section>
-    <p class="foot">Les données viennent du contrôle sanitaire des agences régionales de santé. Aucune inscription, aucun cookie. <a href="/a-propos/">Pourquoi ce site ?</a></p>
+    <p class="foot">Les données viennent du contrôle sanitaire des agences régionales de santé. ${NO_COOKIE ? "Aucune inscription, aucun cookie." : "Aucune inscription."} <a href="/a-propos/">Pourquoi ce site ?</a></p>
   </div>`;
 }
 
@@ -229,6 +231,7 @@ export function renderCity(d) {
           <span class="d">${pbHigh ? "Du plomb a été trouvé au robinet d'un logement. Il vient presque toujours des vieux tuyaux de l'immeuble, pas de l'eau du réseau. En cas de doute, laissez couler l'eau quelques secondes avant de la boire." : "Il est mesuré au robinet de logements et dépend surtout des tuyaux de chaque immeuble."}</span></article>
       </div>
     </section>
+    ${adSlot("city")}
     ${d.others && d.others.length ? `<section class="cmp">
       <div class="cmp-head"><h2>Comparer avec une autre commune</h2><a href="/classement/">Tout le classement</a></div>
       <div class="cmp-list">${d.others.map((r, i) => `<a class="ccard" href="${cityUrl(r[1], r[0])}" style="--i:${i}">${gr(r[2])}<span class="cn"><b>${esc(r[1])}</b><span>${r[2] ? SHORT[r[2]] : "Pas de note"}</span></span>${r[2] ? minibars(r) : ""}</a>`).join("")}</div>
@@ -266,7 +269,7 @@ export function rankRows(list, st) {
   const cell = (label, v, k) => `<span class="met"><span class="ml">${label}</span><span class="mv k${k}">${v}</span><span class="mt"><i class="d-${k}" style="width:${typeof v === "string" && v.endsWith("%") ? Math.max(parseInt(v) > 0 ? 3 : 0, Math.min(parseInt(v), 100)) : v === "Aucun" ? 0 : 100}%"></i></span></span>`;
   const p = (v) => (v < 0 ? "—" : v + " %");
   const k = (v) => (v < 0 ? "na" : v > 100 ? "bad" : v > 80 ? "warn" : "ok");
-  return shown.map((e, i) => `<a class="rrow" href="${cityUrl(e[1], e[0])}" style="--i:${Math.min(i, 20)}"><span class="pos">${fmtInt(e[3])}</span>${gr(e[2])}<span class="nm"><b>${esc(e[1])}</b><span>${depOf(e[0])}${e[8] ? ` · ${fmtInt(e[8] * 1000)} hab.` : ""}</span></span><span class="mets">${cell("Microbes", e[4] ? `${e[4]} fois` : "Aucun", e[4] ? "warn" : "ok")}${cell("Nitrates", p(e[5]), k(e[5]))}${cell("Pesticides", p(e[6]), k(e[6]))}${cell("Polluants éternels", p(e[7]), k(e[7]))}</span><span class="mobmb">${minibars(e)}</span>${chevR}</a>`).join("")
+  return shown.map((e, i) => (i === 5 ? adSlot("rank") : "") + `<a class="rrow" href="${cityUrl(e[1], e[0])}" style="--i:${Math.min(i, 20)}"><span class="pos">${fmtInt(e[3])}</span>${gr(e[2])}<span class="nm"><b>${esc(e[1])}</b><span>${depOf(e[0])}${e[8] ? ` · ${fmtInt(e[8] * 1000)} hab.` : ""}</span></span><span class="mets">${cell("Microbes", e[4] ? `${e[4]} fois` : "Aucun", e[4] ? "warn" : "ok")}${cell("Nitrates", p(e[5]), k(e[5]))}${cell("Pesticides", p(e[6]), k(e[6]))}${cell("Polluants éternels", p(e[7]), k(e[7]))}</span><span class="mobmb">${minibars(e)}</span>${chevR}</a>`).join("")
     + (r.length > shown.length ? `<button type="button" class="more-rows" data-more>Afficher 50 communes de plus <small>(${fmtInt(r.length - shown.length)} restantes)</small></button>` : "");
 }
 export function renderRanking(idx, meta, deps, st) {
@@ -393,7 +396,7 @@ export function renderAbout(meta) {
         <article class="gcard"><div class="gtop">${ico("pb")}<span class="t">Plomb</span></div><span class="d">Il vient surtout des vieux tuyaux de chaque immeuble, pas de l'eau du réseau. Il est mesuré au robinet de particuliers.</span></article>
       </div>
       <h2 class="rk-h2 ab-h">Nos engagements</h2>
-      <ul class="pledge">${["Aucune inscription", "Aucun cookie", "Aucune donnée de visiteur conservée", "Aucun classement payé", "Uniquement des données officielles"].map((t) => `<li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>${t}</li>`).join("")}</ul>
+      <ul class="pledge">${["Aucune inscription", ...(NO_COOKIE ? ["Aucun cookie", "Aucune donnée de visiteur conservée"] : []), "Aucun classement payé", "Publicité clairement signalée, sans influence sur les notes", "Uniquement des données officielles"].filter((t) => NO_COOKIE ? !t.startsWith("Publicité") : true).map((t) => `<li><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>${t}</li>`).join("")}</ul>
       <p class="ab-note" style="margin-top:20px">Source des analyses : « Résultats du contrôle sanitaire de l'eau distribuée commune par commune », ministère de la Santé, publié sur data.gouv.fr sous Licence Ouverte. Période couverte : ${moisFr(meta.start)} à ${moisFr(meta.end)}.</p>
     </div>`;
 }

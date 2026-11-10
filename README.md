@@ -33,7 +33,8 @@ LIMIT_PAGES=300 npm run build   # construction rapide avec les 300 communes les 
 | `scripts/prepare_data.py` | règles de calcul : période, critères, note, réseau principal, classement |
 | `scripts/check_data.mjs` | bloque la construction si les données sont incomplètes ou mal encodées |
 | `src/lib/core.js` | **tout le rendu des pages** et les textes, partagé entre la construction et le navigateur |
-| `src/lib/site.js` | réglages : nom du site, publicité (`ADS`), adresse de contact |
+| `src/lib/site.js` | réglages : nom du site, adresse de contact |
+| `src/lib/ads.js` | **publicité** : interrupteur, identifiants AdSense, emplacements |
 | `src/scripts/app.js` | navigation sans rechargement, recherche, fioles, classement, animations |
 | `src/styles/site.css` | tout le style |
 | `src/pages/` | une route par type de page |
@@ -60,3 +61,7 @@ Chaque page existe en vrai fichier HTML pour Google. Une fois le site ouvert, le
 3. Domaine personnalisé : le fichier `CNAME` est écrit automatiquement à partir de `SITE_URL` ; côté DNS, un enregistrement CNAME `www` vers `<compte>.github.io` et les 4 adresses A de GitHub pour le domaine nu.
 
 Limite à connaître : GitHub Pages accepte un site de 1 Go au plus ; le site en fait environ 520 Mo.
+
+## Activer la publicité
+
+Tout se règle dans `src/lib/ads.js` : passer `enabled` à `true`, renseigner l'identifiant AdSense (`ca-pub-…`) et l'identifiant de chaque bloc. Deux emplacements fixes, marqués « Annonce » : sur chaque page commune entre « Tout sur l'eau de… » et « Comparer », et dans le classement après la 5e commune. Aucune publicité sur l'accueil, la réponse, les fioles ni la page À propos. Les mentions « aucun cookie » disparaissent d'elles-mêmes. Avant d'activer : outil de consentement certifié de Google dans AdSense, mentions légales complètes.
