@@ -617,3 +617,24 @@ a.hb-row:hover .hb-n{text-decoration:underline}
 .alert{display:inline-flex;align-items:center;gap:4px;margin-left:8px;padding:1px 8px 1px 6px;border-radius:10px;font-family:var(--sans);font-size:12.5px;font-weight:700;line-height:1.5;letter-spacing:0;vertical-align:2px;white-space:nowrap}
 .alert-2{background:var(--badbg);color:var(--bad)}
 .alert-1{background:var(--warnbg);color:var(--warn)}
+
+/* Recherche toujours accessible depuis la barre du haut (sauf sur l'accueil, qui l'a déjà en grand) */
+.bar .wrap>.logo{margin-right:auto}
+.bar nav{margin-left:0}
+.menu-btn{margin-left:0}
+.find-btn{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px 0 12px;border:1px solid rgba(255,255,255,.28);border-radius:21px;background:rgba(255,255,255,.1);color:var(--on-deep);font-weight:600;font-size:15px;cursor:pointer}
+.find-btn:hover{background:rgba(255,255,255,.18)}
+body[data-page="home"] .find-btn{display:none}
+@media (max-width:900px){
+  .find-btn{width:44px;height:44px;padding:0;justify-content:center;border-radius:22px}
+  .find-btn span{display:none}
+}
+.sov{position:fixed;inset:0;z-index:70;background:rgba(2,12,22,.6);animation:fadein .15s ease}
+.sov-panel{background:var(--deep);padding:calc(16px + env(safe-area-inset-top,0px)) 16px 20px;box-shadow:0 20px 50px rgba(0,8,18,.5)}
+.sov .search{margin:0 auto;max-width:640px}
+.sov .search label{color:var(--on-deep-2)}
+.sov .field{height:58px}
+.sov .field input{height:54px;font-size:18px}
+.sov .sugg{position:relative;top:auto;margin-top:10px;max-height:calc(100dvh - 160px);overflow:auto}
+body.sov-on{overflow:hidden}
+@media (max-width:640px){.sov{background:var(--deep)}.sov-panel{box-shadow:none}}

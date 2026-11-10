@@ -96,6 +96,7 @@ document.addEventListener("click", (e) => {
   if (url.pathname === location.pathname && url.hash) return; // ancre dans la page
   e.preventDefault();
   closeMenu();
+  if (typeof closeFind === "function") closeFind(false);
   const fromSearch = !!a.closest(".sugg, .pop") || (routeOf(url.pathname) === "city" && routeOf(location.pathname) === "city" && !!a.closest(".cmp"));
   render(url.pathname, { push: true, scrollTo: fromSearch ? "result" : "top", hash: url.hash });
 });
@@ -124,9 +125,11 @@ function enter(page) {
   if (page === "news") animBars();
 }
 
-function bindSearch() {
-  const form = $("[data-search]"), q = $("#q"), sg = $("#sugg");
-  if (!form) return;
+// Recherche : la même logique sert au champ en haut des pages et au panneau ouvert depuis la barre du haut
+function bindSearch(root = $(".hero-s [data-search]"), onPick) {
+  if (!root || root.dataset.bound) return;
+  root.dataset.bound = "1";
+  const form = root, q = root.querySelector("input"), sg = root.querySelector(".sugg");
   let act = -1, items = [];
   const draw = async () => {
     const n = norm(q.value.trim());
@@ -156,10 +159,33 @@ function bindSearch() {
   });
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (items.length) render(cityUrl(items[Math.max(act, 0)][1], items[Math.max(act, 0)][0]), { push: true, scrollTo: "result" });
+    if (!items.length) return;
+    if (onPick) onPick();
+    render(cityUrl(items[Math.max(act, 0)][1], items[Math.max(act, 0)][0]), { push: true, scrollTo: "result" });
   });
-  document.addEventListener("click", (e) => { if (!e.target.closest("[data-search]")) sg.hidden = true; });
+  document.addEventListener("click", (e) => { if (!root.contains(e.target)) sg.hidden = true; });
 }
+
+// Panneau de recherche ouvert depuis la barre du haut, sur toutes les pages sauf l'accueil
+const sov = $("#sov"), findBtn = $("#findBtn"), q2 = $("#q2");
+function openFind() {
+  closeMenu();
+  sov.hidden = false; document.body.classList.add("sov-on");
+  q2.value = ""; $("#sugg2").hidden = true;
+  q2.focus();
+  loadIndex().catch(() => {});
+}
+function closeFind(focusBack = true) {
+  if (sov.hidden) return;
+  sov.hidden = true; document.body.classList.remove("sov-on");
+  if (focusBack) findBtn.focus({ preventScroll: true });
+}
+findBtn.onclick = openFind;
+$("#sovX").onclick = () => closeFind();
+sov.addEventListener("click", (e) => { if (e.target === sov) closeFind(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !sov.hidden) closeFind(); });
+bindSearch(sov.querySelector("[data-search]"), () => closeFind(false));
+
 const depLabel = (code) => { const d = depOf(code); return deps[d] ? `${deps[d]} (${d})` : d; };
 
 function bindCity() {
@@ -227,13 +253,8 @@ function closeMenu() { if (!mnav.hidden) { mnav.hidden = true; mb.setAttribute("
 mb.onclick = () => { mnav.hidden = false; mb.setAttribute("aria-expanded", "true"); document.body.style.overflow = "hidden"; $("#menuX").focus(); };
 $("#menuX").onclick = () => { closeMenu(); mb.focus(); };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !mnav.hidden) { closeMenu(); mb.focus(); } });
-let lastY = 0;
-window.addEventListener("scroll", () => {
-  const y = window.scrollY, bar = $(".bar");
-  bar.classList.toggle("scrolled", y > 8);
-  if (y > 160 && y > lastY + 4) bar.classList.add("hide"); else if (y < lastY - 4 || y < 160) bar.classList.remove("hide");
-  lastY = y;
-}, { passive: true });
+// La barre du haut reste toujours visible : elle porte le bouton de recherche
+window.addEventListener("scroll", () => { $(".bar").classList.toggle("scrolled", window.scrollY > 8); }, { passive: true });
 
 // Première page : déjà affichée par le serveur, on ajoute seulement les comportements
 history.replaceState({}, "", location.href);
