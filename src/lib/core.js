@@ -32,7 +32,7 @@ export function slugify(nom, code) {
 }
 export const depOf = (code) => (code.startsWith("97") ? code.slice(0, 3) : code.slice(0, 2));
 export const cityUrl = (nom, code) => `/eau/${slugify(nom, code)}/`;
-export const rangTxt = (r, ex) => `${r === 1 ? "1re" : fmtInt(r) + "e"}${ex ? " ex aequo" : ""}`;
+export const rangTxt = (r) => (r === 1 ? "1re" : fmtInt(r) + "e");
 
 const lvl = (v, lim) => (v == null ? "na" : v / lim > 1 ? "bad" : v / lim > 0.8 ? "warn" : "ok");
 const pct = (v, lim) => (v == null ? null : Math.round((v / lim) * 100));
@@ -216,7 +216,7 @@ export function renderCity(d) {
       <h2>Tout sur l'eau de ${esc(c.nom)}</h2>
       <div class="good-grid">
         <article class="gcard"><div class="gtop">${ico("rank")}<span class="t">Classement national</span></div>
-          <b class="big">${c.rang ? rangTxt(c.rang, c.ex) : "—"}<small> sur ${fmtInt(d.noted)} communes</small></b>
+          <b class="big">${c.rang ? rangTxt(c.rang) : "—"}<small> sur ${fmtInt(d.noted)} communes</small></b>
           <span class="d">Note ${u.L}${prov ? ", provisoire : certains critères ne sont pas encore analysés ici" : ""}${!isMain ? ` pour ce secteur. Le classement porte sur le réseau principal de la commune` : ""}. <a href="/classement/">Voir le classement</a></span></article>
         <article class="gcard"><div class="gtop">${ico("ctrl")}<span class="t">Contrôles sanitaires</span></div>
           <b class="big">${fmtInt(u.n)}<small> analyse${u.n > 1 ? "s" : ""} en 15 mois</small></b>
