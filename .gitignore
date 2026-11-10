@@ -5,3 +5,4 @@ data/raw/
 data/build/
 public/data/
 .DS_Store
+__pycache__/
