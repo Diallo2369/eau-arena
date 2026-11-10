@@ -97,14 +97,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .next-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
 
 /* fond "Eau" : reflets de lumière façon fond de piscine */
-.deep:not(.bar){position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(900px 520px at 88% -8%,rgba(42,169,210,.32),transparent 62%),radial-gradient(800px 480px at -6% 105%,rgba(16,92,140,.55),transparent 60%),var(--deep)}
-.deep:not(.bar)::before,.deep:not(.bar)::after{content:"";position:absolute;inset:-900px;pointer-events:none;z-index:-1;mix-blend-mode:screen;-webkit-mask-image:linear-gradient(100deg,rgba(0,0,0,.45) 35%,#000 62%);mask-image:linear-gradient(100deg,rgba(0,0,0,.45) 35%,#000 62%)}
-.deep:not(.bar)::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='c' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.009 0.013' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 0 0 0 .9 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3CfeGaussianBlur stdDeviation='.7'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23c)'/%3E%3C/svg%3E");background-size:600px 600px;opacity:.11}
-.deep:not(.bar)::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cfilter id='c' x='0' y='0' width='100%' height='100%'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.009' numOctaves='2' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 1 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 0 0 0 .9 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3CfeGaussianBlur stdDeviation='.7'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23c)'/%3E%3C/svg%3E");background-size:900px 900px;opacity:.06}
-@keyframes drift1{to{transform:translate(600px,600px)}}
-@keyframes drift2{to{transform:translate(-900px,900px)}}
-.bar.scrolled{background:rgba(10,53,84,.74);-webkit-backdrop-filter:blur(16px) saturate(140%);backdrop-filter:blur(16px) saturate(140%)}
-@media (prefers-reduced-motion:reduce){.deep::before,.deep::after{animation:none}}
+.deep:not(.bar){position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(900px 520px at 88% -8%,rgba(42,169,210,.32),transparent 62%),radial-gradient(800px 480px at -6% 105%,rgba(16,92,140,.55),transparent 60%),linear-gradient(100deg,color-mix(in srgb,var(--deep) 55%,transparent) 35%,transparent 62%),url("/eau-1.webp") 0 0/600px 600px,url("/eau-2.webp") 0 0/900px 900px,var(--deep)}
+/* Reflets d'eau : images fixes précalculées (scripts/og/eau.mjs), plus de filtre SVG ni de calque en mélange */
+.bar.scrolled{background:rgba(10,53,84,.97)}
 
 
 .good{padding-top:8px}
@@ -415,7 +410,7 @@ button.tube[aria-pressed="true"] .see{color:#FFFFFF}
 .hint{font-size:14px;color:var(--on-deep-2);margin-top:12px;text-align:center}
 
 .light{padding-block:40px 24px}
-.dpanel{grid-column:1/-1;background:rgba(5,28,46,.62);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:26px 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 48px;align-items:start;color:var(--on-deep)}
+.dpanel{grid-column:1/-1;background:rgba(5,28,46,.8);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:26px 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 48px;align-items:start;color:var(--on-deep)}
 .dp-a,.dp-b{display:flex;flex-direction:column;gap:14px;min-width:0}
 @media (max-width:860px){.dpanel{grid-template-columns:minmax(0,1fr)}}
 .dpanel .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
@@ -593,7 +588,8 @@ a.hb-row:hover .hb-n{text-decoration:underline}
 .prose.legal h2{font-size:22px;margin-top:8px}
 .prose.legal p{font-size:16.5px}
 .prose.legal a{color:var(--ink)}
-/* La liste de suggestions déborde du bandeau de recherche : le bandeau ne coupe plus son contenu,
-   seul le motif d'eau (pseudo-éléments débordant de 900px) reste découpé à ses bords. */
+/* La liste de suggestions déborde du bandeau de recherche : le bandeau ne coupe pas son contenu. */
 .deep.hero-s{overflow:visible;z-index:5}
-.deep.hero-s::before,.deep.hero-s::after{clip-path:inset(900px)}
+
+/* Les fioles se remplissent sans recalculer la mise en page du reste de la page */
+.glass{contain:layout paint}

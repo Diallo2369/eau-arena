@@ -116,7 +116,8 @@ function fillAds() {
 }
 function enter(page) {
   fillAds();
-  app.classList.remove("anim"); void app.offsetWidth; app.classList.add("anim");
+  // Le contenu vient d'être remplacé : ses animations démarrent d'elles-mêmes, sans forcer de recalcul.
+  app.classList.add("anim");
   if (page === "home" || page === "city") bindSearch();
   if (page === "city") { bindCity(); fill(); }
   if (page === "rank") bindRank();
