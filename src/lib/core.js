@@ -91,6 +91,14 @@ const ARS_ICO = {
   none: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.7v.3"/>',
   past: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/>',
 };
+// Petit pictogramme pour une consigne de l'ARS en cours (lignes d'index : r[9] = 2 ne pas boire, 1 déconseillée)
+export function alertTag(a) {
+  if (!a) return "";
+  const t = a === 2 ? "Consigne en cours : ne pas boire" : "Consigne en cours : déconseillée à certaines personnes";
+  return `<span class="alert alert-${a}" title="${t}" role="img" aria-label="${t}"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 16.5h-19z"/><path d="M12 10v4M12 17v.2"/></svg>${a === 2 ? "Ne pas boire" : "Déconseillée"}</span>`;
+}
+const alertOf = (u) => (u && u.ars && !u.ars.old ? (u.ars.k === "risk" ? 1 : u.ars.k === "ban" || u.ars.k === "boil" ? 2 : 0) : 0);
+
 export function arsAdvice(u) {
   const a = u.ars;
   if (!a || !a.t) return null;
@@ -127,7 +135,7 @@ const calcLvl = (th) => (th < 15 ? 0 : th < 25 ? 1 : th < 35 ? 2 : 3);
 export function othersFrom(list, code) {
   const p = (v, l) => (v == null ? -1 : Math.round((v / l) * 100));
   return list.filter((x) => x.code !== code && x.u && x.u.L).sort((a, b) => b.pop - a.pop).slice(0, 4)
-    .map((x) => [x.code, x.nom, x.u.L, x.rang, x.u.b, p(x.u.no3, 50), p(x.u.pe, 0.5), p(x.u.pf, 0.1), Math.round(x.pop / 1000)]);
+    .map((x) => [x.code, x.nom, x.u.L, x.rang, x.u.b, p(x.u.no3, 50), p(x.u.pe, 0.5), p(x.u.pf, 0.1), Math.round(x.pop / 1000), alertOf(x.u)]);
 }
 // Données d'une commune à partir d'un fichier de département (public/data/dep/<dep>.json)
 export function cityFromDep(dep, code) {
@@ -277,7 +285,7 @@ export function renderCity(d) {
     ${adSlot("city")}
     ${d.others && d.others.length ? `<section class="cmp">
       <div class="cmp-head"><h2>Comparer avec une autre commune</h2><a href="/classement/">Tout le classement</a></div>
-      <div class="cmp-list">${d.others.map((r, i) => `<a class="ccard" href="${cityUrl(r[1], r[0])}" style="--i:${i}">${gr(r[2])}<span class="cn"><b>${esc(r[1])}</b><span>${r[2] ? SHORT[r[2]] : "Pas de note"}</span></span>${r[2] ? minibars(r) : ""}</a>`).join("")}</div>
+      <div class="cmp-list">${d.others.map((r, i) => `<a class="ccard" href="${cityUrl(r[1], r[0])}" style="--i:${i}">${gr(r[2])}<span class="cn"><b>${esc(r[1])}</b><span>${r[2] ? SHORT[r[2]] : "Pas de note"}${alertTag(r[9])}</span></span>${r[2] ? minibars(r) : ""}</a>`).join("")}</div>
       <p class="cmp-leg">Les petites barres reprennent les 4 fioles : microbes, nitrates, pesticides, polluants éternels.</p>
     </section>` : ""}
     <p class="foot">Source : contrôle sanitaire des agences régionales de santé (ministère de la Santé). Pour chaque critère, on retient la valeur la plus haute mesurée en 15 mois, jusqu'en ${moisFr(u.last)}. <a href="/a-propos/">Comment lire ces résultats</a></p>
@@ -318,14 +326,14 @@ export function rankRows(list, st) {
   const cell = (label, v, k) => `<span class="met"><span class="ml">${label}</span><span class="mv k${k}">${v}</span><span class="mt"><i class="d-${k}" style="width:${typeof v === "string" && v.endsWith("%") ? Math.max(parseInt(v) > 0 ? 3 : 0, Math.min(parseInt(v), 100)) : v === "Aucun" ? 0 : 100}%"></i></span></span>`;
   const p = (v) => (v < 0 ? "—" : v + " %");
   const k = (v) => (v < 0 ? "na" : v > 100 ? "bad" : v > 80 ? "warn" : "ok");
-  return shown.map((e, i) => (i === 5 ? adSlot("rank") : "") + `<a class="rrow" href="${cityUrl(e[1], e[0])}" style="--i:${Math.min(i, 20)}"><span class="pos">${fmtInt(loc.get(e[0]))}</span>${gr(e[2])}<span class="nm"><b>${esc(e[1])}</b><span>${depOf(e[0])}${e[8] ? `<i class="pp"> · ${fmtInt(e[8] * 1000)} hab.</i>` : ""}${nat ? ` · ${rangTxt(e[3])} en France` : ""}</span></span><span class="mets">${cell("Microbes", e[4] ? `${e[4]} fois` : "Aucun", e[4] ? "warn" : "ok")}${cell("Nitrates", p(e[5]), k(e[5]))}${cell("Pesticides", p(e[6]), k(e[6]))}${cell("Polluants éternels", p(e[7]), k(e[7]))}</span><span class="mobmb">${minibars(e)}</span>${chevR}</a>`).join("")
+  return shown.map((e, i) => (i === 5 ? adSlot("rank") : "") + `<a class="rrow" href="${cityUrl(e[1], e[0])}" style="--i:${Math.min(i, 20)}"><span class="pos">${fmtInt(loc.get(e[0]))}</span>${gr(e[2])}<span class="nm"><b>${esc(e[1])}${alertTag(e[9])}</b><span>${depOf(e[0])}${e[8] ? `<i class="pp"> · ${fmtInt(e[8] * 1000)} hab.</i>` : ""}${nat ? ` · ${rangTxt(e[3])} en France` : ""}</span></span><span class="mets">${cell("Microbes", e[4] ? `${e[4]} fois` : "Aucun", e[4] ? "warn" : "ok")}${cell("Nitrates", p(e[5]), k(e[5]))}${cell("Pesticides", p(e[6]), k(e[6]))}${cell("Polluants éternels", p(e[7]), k(e[7]))}</span><span class="mobmb">${minibars(e)}</span>${chevR}</a>`).join("")
     + (r.length > shown.length ? `<button type="button" class="more-rows" data-more>Afficher 50 communes de plus <small>(${fmtInt(r.length - shown.length)} restantes)</small></button>` : "");
 }
 export function renderRanking(idx, meta, deps, st) {
   const list = rankFilter(idx, st);
   const cnt = (L) => list.filter((e) => e[2] === L).length;
   const top = list.slice(0, 3), low = list.slice(-3).reverse();
-  const pc = (e) => `<a class="pcard" href="${cityUrl(e[1], e[0])}"><span class="pos-big">${rangTxt(e[3])} en France</span>${gr(e[2])}<b>${esc(e[1])}</b><span class="pd">${depOf(e[0])}</span>${minibars(e)}</a>`;
+  const pc = (e) => `<a class="pcard" href="${cityUrl(e[1], e[0])}"><span class="pos-big">${rangTxt(e[3])} en France</span>${gr(e[2])}<b>${esc(e[1])}</b><span class="pd">${depOf(e[0])}${alertTag(e[9])}</span>${minibars(e)}</a>`;
   const scopeName = st.dep ? `Département : ${esc(deps[st.dep] || st.dep)}` : SCOPES.find((s) => s[0] === st.scope)[1];
   const lowAll = low.some((e) => e[2] === "E");
   return `<section class="deep"><div class="wrap rk-hero">

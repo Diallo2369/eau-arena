@@ -2,7 +2,7 @@
 // Les pages sont reconstruites ici avec les mêmes fonctions que celles de la construction (lib/core.js).
 // Données : l'index des communes est chargé en tâche de fond ; le détail d'une commune vient du fichier
 // de son département, chargé à l'arrivée sur la commune (ou en avance, au survol d'un lien).
-import { renderHome, renderCity, renderRanking, rankFilter, rankRows, renderNews, renderAbout, cityFromDep, seo,
+import { renderHome, renderCity, renderRanking, rankFilter, rankRows, renderNews, renderAbout, cityFromDep, seo, alertTag,
   depOf, norm, esc, gr, cityUrl } from "../lib/core.js";
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -142,7 +142,7 @@ function bindSearch() {
     }
     items = starts.concat(contains).slice(0, 8);
     act = Math.min(act, items.length - 1);
-    sg.innerHTML = items.length ? items.map((r, i) => `<a role="option" class="${i === act ? "active" : ""}" href="${cityUrl(r[1], r[0])}" aria-selected="${i === act}"><span class="n"><b>${esc(r[1])}</b><span>${depLabel(r[0])}</span></span>${gr(r[2] || null)}</a>`).join("")
+    sg.innerHTML = items.length ? items.map((r, i) => `<a role="option" class="${i === act ? "active" : ""}" href="${cityUrl(r[1], r[0])}" aria-selected="${i === act}"><span class="n"><b>${esc(r[1])}${alertTag(r[9])}</b><span>${depLabel(r[0])}</span></span>${gr(r[2] || null)}</a>`).join("")
       : '<p class="empty">Aucune commune ne correspond. Vérifiez l\'orthographe ou tapez le code postal de la commune.</p>';
     sg.hidden = false; q.setAttribute("aria-expanded", "true");
     if (items[0]) loadDep(depOf(items[Math.max(act, 0)][0])).catch(() => {});

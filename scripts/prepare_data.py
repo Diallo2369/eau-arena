@@ -264,7 +264,7 @@ def main():
         return None if v is None else round(v / lim * 100)
 
     # Index léger, trié par population : [code, nom, lettre, rang, microbes, %nitrates, %pesticides, %pfas,
-    # population en milliers]. L'adresse (slug) et le département se déduisent du nom et du code.
+    # population en milliers, et en option consigne ARS en cours]. L'adresse (slug) et le département se déduisent du nom et du code.
     index = []
     for c in sorted(communes.values(), key=lambda c: -c["pop"]):
         u = out_udi.get(c["main"]) if c["main"] else None
@@ -273,8 +273,12 @@ def main():
             index.append([c["c"], c["nom"], 0, 0, 0, 0, 0, 0, pk])
             continue
         n = lambda v: -1 if v is None else v
-        index.append([c["c"], c["nom"], u["L"], rank[c["c"]], u["b"], n(pct(u["no3"], 50)), n(pct(u["pe"], 0.5)),
-                      n(pct(u["pf"], 0.1)), pk])
+        row = [c["c"], c["nom"], u["L"], rank[c["c"]], u["b"], n(pct(u["no3"], 50)), n(pct(u["pe"], 0.5)),
+               n(pct(u["pf"], 0.1)), pk]
+        a = u.get("ars")
+        if a and a["k"] in ("ban", "boil", "risk") and not a.get("old"):
+            row.append(1 if a["k"] == "risk" else 2)  # consigne de l'ARS en cours : 2 ne pas boire, 1 déconseillée
+        index.append(row)
     with open(os.path.join(PUBLIC, "index.json"), "w", encoding="utf-8") as f:
         json.dump({"meta": {"start": meta["start"], "end": meta["end"], "noted": len(noted), "dist": dist},
                    "deps": {k: deps[k] for k in sorted({c["dep"] for c in communes.values()}) if k in deps}, "c": index},
