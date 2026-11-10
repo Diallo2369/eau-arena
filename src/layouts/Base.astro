@@ -2,7 +2,7 @@
 import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "@fontsource-variable/schibsted-grotesk/index.css";
 import "../styles/site.css";
-import { SITE_NAME, SITE_URL, INDEXABLE } from "../lib/site.js";
+import { SITE_NAME, SITE_URL, INDEXABLE, CONTACT } from "../lib/site.js";
 import { load } from "../lib/data.js";
 import { ADS } from "../lib/ads.js";
 
@@ -51,6 +51,7 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   <main id="app" tabindex="-1"><slot /></main>
   <footer class="site-foot"><div class="wrap">
     <p><b>Eau Arena</b> · Les analyses officielles de l'eau du robinet, expliquées simplement.</p>
+    {CONTACT && <p>Une question, une erreur à signaler : <a href={`mailto:${CONTACT}`}>{CONTACT}</a></p>}
     <p>Données : ministère de la Santé, contrôle sanitaire des eaux (Licence Ouverte). Analyses de {meta.start.slice(0, 7).split("-").reverse().join("/")} à {meta.end.slice(0, 7).split("-").reverse().join("/")}.</p>
   </div></footer>
   <script type="application/json" id="boot" set:html={boot} />
