@@ -27,7 +27,7 @@ jobs:
     env:
       # Adresse définitive du site (ex. https://eauarena.fr). Tant qu'elle est vide, le site est publié
       # mais bloqué pour Google (noindex, robots.txt). À renseigner dans Settings > Variables > Actions.
-      SITE_URL: ${{ vars.SITE_URL }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://eauarena.fr' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
