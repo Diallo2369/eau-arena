@@ -1,0 +1,58 @@
+---
+import "@fontsource-variable/bricolage-grotesque/opsz.css";
+import "@fontsource-variable/schibsted-grotesk/index.css";
+import "../styles/site.css";
+import { SITE_NAME, SITE_URL, INDEXABLE } from "../lib/site.js";
+import { load } from "../lib/data.js";
+
+const { title, description, page, pageData = null, noindex = false } = Astro.props;
+const { meta, index } = load();
+const popular = index.filter((r) => r[2]).slice(0, 6);
+const boot = JSON.stringify({ meta, popular });
+const canonical = SITE_URL ? SITE_URL + Astro.url.pathname : null;
+const fullTitle = page === "home" ? title : `${title} | ${SITE_NAME}`;
+const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], ["news", "/actualites/", "Actualités"], ["about", "/a-propos/", "À propos"]];
+---
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  {(!INDEXABLE || noindex) && <meta name="robots" content="noindex" />}
+  {canonical && <link rel="canonical" href={canonical} />}
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={SITE_NAME} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  {canonical && <meta property="og:url" content={canonical} />}
+  {SITE_URL && <meta property="og:image" content={SITE_URL + "/og.png"} />}
+  <meta name="theme-color" content="#0A3554" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+</head>
+<body data-page={page}>
+  <a class="skip" href="#app">Aller au contenu</a>
+  <header class="deep bar">
+    <div class="wrap">
+      <a class="logo" href="/" aria-label="Eau Arena, accueil"><i aria-hidden="true"></i>Eau Arena</a>
+      <nav aria-label="Menu" class="topnav">
+        {nav.map(([k, href, label]) => <a href={href} data-nav={k} aria-current={k === page ? "page" : "false"}>{label}</a>)}
+      </nav>
+      <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="mnav">Menu<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+  </header>
+  <div class="mnav" id="mnav" hidden>
+    <div class="mnav-top"><span class="logo"><i aria-hidden="true"></i>Eau Arena</span><button type="button" class="pop-x" id="menuX" aria-label="Fermer le menu"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <nav aria-label="Menu principal">{nav.map(([k, href, label]) => <a href={href} data-nav={k}>{label}</a>)}</nav>
+  </div>
+  <main id="app" tabindex="-1"><slot /></main>
+  <footer class="site-foot"><div class="wrap">
+    <p><b>Eau Arena</b> · Les analyses officielles de l'eau du robinet, expliquées simplement.</p>
+    <p>Données : ministère de la Santé, contrôle sanitaire des eaux (Licence Ouverte). Analyses de {meta.start.slice(0, 7).split("-").reverse().join("/")} à {meta.end.slice(0, 7).split("-").reverse().join("/")}.</p>
+  </div></footer>
+  <script type="application/json" id="boot" set:html={boot} />
+  {pageData && <script type="application/json" id="pd" set:html={JSON.stringify(pageData)} />}
+  <script src="../scripts/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+---
+import Base from "../../layouts/Base.astro";
+import { renderCity, seo } from "../../lib/core.js";
+import { load, cityData } from "../../lib/data.js";
+
+export function getStaticPaths() {
+  const { site } = load();
+  const all = Object.values(site.communes).sort((a, b) => b.pop - a.pop);
+  const lim = Number(process.env.LIMIT_PAGES || 0); // pour tester vite : LIMIT_PAGES=200
+  return (lim ? all.slice(0, lim) : all).map((c) => ({ params: { slug: c.slug }, props: { code: c.c } }));
+}
+const { code } = Astro.props;
+const { meta } = load();
+const d = cityData(code);
+const u = d.c.main ? d.u[d.c.main] : null;
+const s = seo("city", { nom: d.c.nom, dep: d.c.dep, L: u?.L, year: meta.end.slice(0, 4) });
+const pageData = { code, ...d };
+---
+<Base title={s.title} description={s.desc} page="city" pageData={pageData} noindex={!u}>
+  <Fragment set:html={renderCity({ ...d, noted: meta.noted })} />
+</Base>

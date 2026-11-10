@@ -1,0 +1,8 @@
+---
+import Base from "../../layouts/Base.astro";
+import { renderAbout, seo } from "../../lib/core.js";
+import { load } from "../../lib/data.js";
+const { meta } = load();
+const s = seo("about");
+---
+<Base title={s.title} description={s.desc} page="about"><Fragment set:html={renderAbout(meta)} /></Base>

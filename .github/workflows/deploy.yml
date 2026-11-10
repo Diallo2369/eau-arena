@@ -1,0 +1,66 @@
+# Construit et publie le site sur GitHub Pages.
+# - à chaque envoi sur la branche main ;
+# - chaque lundi à 6 h 17 (heure de Paris en hiver), pour reprendre les nouvelles analyses publiées ;
+# - à la demande, depuis l'onglet Actions.
+name: Construire et publier
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # Adresse définitive du site (ex. https://eauarena.fr). Tant qu'elle est vide, le site est publié
+      # mais bloqué pour Google (noindex, robots.txt). À renseigner dans Settings > Variables > Actions.
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Dépendances
+        run: npm ci
+      - name: Fichiers officiels en cache
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}
+          restore-keys: raw-
+      - name: Télécharger les analyses (data.gouv.fr)
+        run: npm run data:fetch
+      - name: Préparer les données
+        run: npm run data:prepare
+      - name: Construire le site (avec contrôle des données)
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

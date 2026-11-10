@@ -1,0 +1,8 @@
+---
+import Base from "../../layouts/Base.astro";
+import { renderNews, seo } from "../../lib/core.js";
+import { load } from "../../lib/data.js";
+const { index, meta } = load();
+const s = seo("news");
+---
+<Base title={s.title} description={s.desc} page="news"><Fragment set:html={renderNews(index, meta)} /></Base>

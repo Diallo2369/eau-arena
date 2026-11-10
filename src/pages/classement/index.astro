@@ -1,0 +1,10 @@
+---
+import Base from "../../layouts/Base.astro";
+import { renderRanking, seo } from "../../lib/core.js";
+import { load } from "../../lib/data.js";
+const { index, meta, depNames } = load();
+const s = seo("rank", { year: meta.end.slice(0, 4) });
+---
+<Base title={s.title} description={s.desc} page="rank">
+  <Fragment set:html={renderRanking(index, meta, depNames, { scope: "big", desc: true, n: 50 })} />
+</Base>
