@@ -29,6 +29,10 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   <meta property="og:description" content={description} />
   {canonical && <meta property="og:url" content={canonical} />}
   {SITE_URL && <meta property="og:image" content={SITE_URL + "/og.png"} />}
+  {SITE_URL && <meta property="og:image:width" content="1200" />}
+  {SITE_URL && <meta property="og:image:height" content="630" />}
+  <meta property="og:locale" content="fr_FR" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="theme-color" content="#0A3554" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   {ADS.enabled && ADS.client && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADS.client}`} crossorigin="anonymous"></script>}
@@ -51,6 +55,7 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   <main id="app" tabindex="-1"><slot /></main>
   <footer class="site-foot"><div class="wrap">
     <p><b>Eau Arena</b> · Les analyses officielles de l'eau du robinet, expliquées simplement.</p>
+    <p class="foot-links"><a href="/a-propos/">À propos</a> · <a href="/mentions-legales/">Mentions légales</a> · <a href="/confidentialite/">Confidentialité</a></p>
     {CONTACT && <p>Une question, une erreur à signaler : <a href={`mailto:${CONTACT}`}>{CONTACT}</a></p>}
     <p>Données : ministère de la Santé, contrôle sanitaire des eaux (Licence Ouverte). Analyses de {meta.start.slice(0, 7).split("-").reverse().join("/")} à {meta.end.slice(0, 7).split("-").reverse().join("/")}.</p>
   </div></footer>

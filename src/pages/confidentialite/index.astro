@@ -1,0 +1,19 @@
+---
+import Base from "../../layouts/Base.astro";
+import { CONTACT } from "../../lib/site.js";
+import { ADS } from "../../lib/ads.js";
+---
+<Base title="Confidentialité" description="Eau Arena ne demande aucune inscription et ne conserve aucune donnée sur ses visiteurs." page="legal">
+  <section class="deep"><div class="wrap rk-hero"><h1>Confidentialité</h1><p class="rk-sub">En bref : aucune inscription, aucune donnée personnelle conservée{ADS.enabled ? "." : ", aucun cookie."}</p></div></section>
+  <div class="wrap"><article class="prose legal">
+    <h2>Ce que nous ne faisons pas</h2>
+    <p>Eau Arena ne demande ni inscription, ni adresse e-mail, ni localisation. La commune que vous recherchez n'est envoyée à aucun serveur : la recherche se fait entièrement dans votre navigateur, à partir de fichiers publics téléchargés depuis ce site.</p>
+    {!ADS.enabled && <p>Le site n'utilise aucun cookie et aucun outil de mesure d'audience ou de publicité.</p>}
+    {ADS.enabled && <p>Le site affiche de la publicité fournie par Google AdSense. Avec votre accord, recueilli par le bandeau de consentement, Google peut déposer des cookies pour mesurer et personnaliser les annonces. Vous pouvez modifier votre choix à tout moment depuis le lien « Gérer les cookies ».</p>}
+    <h2>Données techniques</h2>
+    <p>Comme tout site web, l'hébergeur (GitHub Pages) reçoit l'adresse IP de votre appareil pour vous envoyer les pages et protéger le service ; il la traite selon sa propre déclaration de confidentialité. Le nom de domaine est géré par Cloudflare (DNS uniquement). Les polices de caractères sont hébergées sur ce site, sans appel à un service tiers.</p>
+    <h2>Vos droits</h2>
+    <p>Eau Arena ne détient aucune donnée personnelle vous concernant. Pour toute question : <a href={`mailto:${CONTACT}`}>{CONTACT}</a>. Vous pouvez aussi saisir la CNIL (cnil.fr).</p>
+    <p class="ab-note">Mise à jour le 10 novembre 2026.</p>
+  </article></div>
+</Base>
