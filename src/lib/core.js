@@ -262,6 +262,12 @@ export function rankFilter(idx, st) {
   return r.sort((a, b) => a[3] - b[3] || b[8] - a[8]);
 }
 export function rankRows(list, st) {
+  // Rang dans la sélection affichée (1, 2, 3…) ; égalité nationale = même rang. Le rang national
+  // passe sous le nom quand la sélection n'est pas « toutes les communes ».
+  const loc = new Map();
+  let prev = null, pos = 0;
+  list.forEach((e, i) => { if (e[3] !== prev) { pos = i + 1; prev = e[3]; } loc.set(e[0], pos); });
+  const nat = st.dep || st.scope !== "all";
   let r = st.L ? list.filter((x) => x[2] === st.L) : list;
   if (!st.desc) r = r.slice().reverse();
   if (!r.length) return `<p class="empty-rk">Aucune commune avec la note ${st.L} dans cette sélection.</p>`;
@@ -269,7 +275,7 @@ export function rankRows(list, st) {
   const cell = (label, v, k) => `<span class="met"><span class="ml">${label}</span><span class="mv k${k}">${v}</span><span class="mt"><i class="d-${k}" style="width:${typeof v === "string" && v.endsWith("%") ? Math.max(parseInt(v) > 0 ? 3 : 0, Math.min(parseInt(v), 100)) : v === "Aucun" ? 0 : 100}%"></i></span></span>`;
   const p = (v) => (v < 0 ? "—" : v + " %");
   const k = (v) => (v < 0 ? "na" : v > 100 ? "bad" : v > 80 ? "warn" : "ok");
-  return shown.map((e, i) => (i === 5 ? adSlot("rank") : "") + `<a class="rrow" href="${cityUrl(e[1], e[0])}" style="--i:${Math.min(i, 20)}"><span class="pos">${fmtInt(e[3])}</span>${gr(e[2])}<span class="nm"><b>${esc(e[1])}</b><span>${depOf(e[0])}${e[8] ? ` · ${fmtInt(e[8] * 1000)} hab.` : ""}</span></span><span class="mets">${cell("Microbes", e[4] ? `${e[4]} fois` : "Aucun", e[4] ? "warn" : "ok")}${cell("Nitrates", p(e[5]), k(e[5]))}${cell("Pesticides", p(e[6]), k(e[6]))}${cell("Polluants éternels", p(e[7]), k(e[7]))}</span><span class="mobmb">${minibars(e)}</span>${chevR}</a>`).join("")
+  return shown.map((e, i) => (i === 5 ? adSlot("rank") : "") + `<a class="rrow" href="${cityUrl(e[1], e[0])}" style="--i:${Math.min(i, 20)}"><span class="pos">${fmtInt(loc.get(e[0]))}</span>${gr(e[2])}<span class="nm"><b>${esc(e[1])}</b><span>${depOf(e[0])}${e[8] ? `<i class="pp"> · ${fmtInt(e[8] * 1000)} hab.</i>` : ""}${nat ? ` · ${rangTxt(e[3])} en France` : ""}</span></span><span class="mets">${cell("Microbes", e[4] ? `${e[4]} fois` : "Aucun", e[4] ? "warn" : "ok")}${cell("Nitrates", p(e[5]), k(e[5]))}${cell("Pesticides", p(e[6]), k(e[6]))}${cell("Polluants éternels", p(e[7]), k(e[7]))}</span><span class="mobmb">${minibars(e)}</span>${chevR}</a>`).join("")
     + (r.length > shown.length ? `<button type="button" class="more-rows" data-more>Afficher 50 communes de plus <small>(${fmtInt(r.length - shown.length)} restantes)</small></button>` : "");
 }
 export function renderRanking(idx, meta, deps, st) {
@@ -303,7 +309,7 @@ export function renderRanking(idx, meta, deps, st) {
       </div>
       <div class="rhead" aria-hidden="true"><span>Rang</span><span></span><span>Commune</span><span class="hm"><span>Microbes</span><span>Nitrates</span><span>Pesticides</span><span>Polluants éternels</span></span><span></span></div>
       <div class="rlist" id="rlist">${rankRows(list, st)}</div>
-      <p class="cmp-leg">Le rang est national. Valeurs les plus hautes des 15 derniers mois, en part de la limite de santé.</p>
+      <p class="cmp-leg">${st.dep || st.scope !== "all" ? "Le rang est celui de la sélection affichée ; le rang en France figure sous chaque commune. " : ""}Valeurs les plus hautes des 15 derniers mois, en part de la limite de santé.</p>
     </div>`;
 }
 
