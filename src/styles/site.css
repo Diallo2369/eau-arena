@@ -593,3 +593,23 @@ a.hb-row:hover .hb-n{text-decoration:underline}
 
 /* Les fioles se remplissent sans recalculer la mise en page du reste de la page */
 .glass{contain:layout paint}
+
+/* Avis de l'agence régionale de santé, sous la réponse */
+.ars{margin-top:18px;display:flex;gap:14px;align-items:flex-start;max-width:46ch;padding:14px 18px 14px 14px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.2);color:var(--on-deep)}
+.ars-ic{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);color:var(--on-deep)}
+.ars-txt{min-width:0}
+.ars-txt>b{display:block;font-size:17px;font-weight:700;line-height:1.3}
+.ars-txt>span{display:block;margin-top:4px;font-size:14.5px;line-height:1.45;color:var(--on-deep-2)}
+.ars details{margin-top:8px}
+.ars summary{display:inline-block;cursor:pointer;font-size:14px;font-weight:600;color:var(--on-deep);text-decoration:underline;text-underline-offset:3px;list-style:none}
+.ars summary::-webkit-details-marker{display:none}
+.ars blockquote{margin:10px 0 2px;padding-left:12px;border-left:2px solid rgba(255,255,255,.3);font-size:14px;line-height:1.55;color:var(--on-deep-2);max-height:240px;overflow:auto}
+.ars-ban{background:rgba(239,106,85,.16);border-color:rgba(239,106,85,.7)}
+.ars-ban .ars-ic{background:#EF6A55;color:#fff}
+.ars-boil,.ars-risk{background:rgba(240,164,58,.14);border-color:rgba(240,164,58,.65)}
+.ars-boil .ars-ic,.ars-risk .ars-ic{background:#F0A43A;color:#2B1700}
+.ars-ok{background:rgba(64,190,128,.12);border-color:rgba(64,190,128,.55)}
+.ars-ok .ars-ic{background:#3DBA7E;color:#04220F}
+.anim .ars{animation:rise .6s 1.35s both}
+.ars-past{background:rgba(240,164,58,.08);border-color:rgba(240,164,58,.4)}
+.ars-past .ars-ic{background:rgba(240,164,58,.25);color:#FFD9A0}

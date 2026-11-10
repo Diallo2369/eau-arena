@@ -19,6 +19,9 @@ Règles (voir aussi la page « À propos ») :
 import csv, datetime as dt, io, json, os, re, statistics, sys, unicodedata, zipfile
 from collections import defaultdict
 
+sys.path.insert(0, os.path.dirname(__file__))
+from ars import Repair, active, conforming, groups  # avis officiel de l'ARS (peut-on la boire ?)
+
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 RAW = os.path.join(ROOT, "data", "raw")
 BUILD = os.path.join(ROOT, "data", "build")
@@ -100,23 +103,27 @@ def main():
     # Un même prélèvement apparaît sur plusieurs lignes, une par réseau (UDI) qu'il représente :
     # ses résultats valent pour chacun de ces réseaux.
     prel = {}
+    concl = {}  # conclusion de l'ARS pour chaque prélèvement
     last_date = dt.date(1900, 1, 1)
     for y in ys:
         for r in open_member(y, "PLV"):
             d = dt.date.fromisoformat(r["dateprel"])
             e = prel.setdefault(r["referenceprel"], [set(), d, r["distrlib"] or r["moalib"]])
             e[0].add(r["cdreseau"])
+            if r["conclusionprel"].strip():
+                concl[r["referenceprel"]] = r["conclusionprel"].strip()
             last_date = max(last_date, d)
     m = last_date.year * 12 + last_date.month - 1 - (MONTHS - 1)
     start = dt.date(m // 12, m % 12 + 1, 1)
     print(f"Période retenue : du {start} au {last_date}")
     prel = {k: v for k, v in prel.items() if v[1] >= start}
 
-    udi = defaultdict(lambda: {"n": 0, "dist": defaultdict(int), "last": None})
+    udi = defaultdict(lambda: {"n": 0, "dist": defaultdict(int), "last": None, "pl": []})
     for ref, (nets, d, dist) in prel.items():
         for res in nets:
             u = udi[res]
             u["n"] += 1
+            u["pl"].append((d, concl.get(ref, "")))
             u["dist"][dist] += 1
             u["last"] = max(u["last"], d) if u["last"] else d
 
@@ -142,7 +149,9 @@ def main():
                 else:
                     acc[res][code].append((d, v))
 
+    repair = Repair(set(concl.values()))
     out_udi = {}
+    advice_n = defaultdict(int)
     for res, u in udi.items():
         a = acc.get(res, {})
         rec = {"n": u["n"], "b": len(bact_pos.get(res, ())), "last": u["last"].isoformat(),
@@ -163,7 +172,23 @@ def main():
         th = a.get("TH")
         rec["th"] = round(statistics.median(v for _, v in th), 1) if th else None
         rec["L"], rec["s"] = grade(rec)
+        # Avis de l'ARS : gardé quand il restreint la consommation, ou pour les notes D et E
+        av = active(u["pl"])
+        if av and (av[0] in ("ban", "boil", "risk") or (rec["L"] in ("D", "E") and av[2])):
+            k, d, t, now = av
+            if k == "none" and conforming(t):
+                k = "conf"
+            rec["ars"] = {"k": k, "d": d.isoformat(), "t": repair(t)}
+            # Consigne « actuelle » : encore présente au dernier prélèvement et datant de moins de 60 jours
+            # avant la fin des données. Sinon on la présente comme passée, en renvoyant vers la mairie.
+            if k in ("ban", "boil", "risk") and not (now and (last_date - d).days <= 60):
+                rec["ars"]["old"] = 1
+            if k == "risk":
+                rec["ars"]["g"] = groups(t)
+            advice_n[k + ("-passée" if rec["ars"].get("old") else "")] += 1
         out_udi[res] = rec
+
+    print("Avis ARS retenus :", dict(advice_n))
 
     # 3. Communes et réseaux qui les desservent (fichier le plus récent)
     names = {}

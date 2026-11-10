@@ -62,6 +62,8 @@ export const provisional = (u) => u.pf == null || u.pe == null;
 
 export function verdict(u, crit) {
   const L = u.L;
+  if (u.ars?.k === "ban" && !u.ars.old) return { k: "bad", titre: "Ne la buvez pas en ce moment.", sous: "" };
+  if (u.ars?.k === "boil" && !u.ars.old) return { k: "bad", titre: "À faire bouillir avant de la boire.", sous: "" };
   const over = crit.filter((c) => c.k === "bad");
   if (L === "E" && over.length) {
     return { k: "bad", titre: "Une limite de santé a été dépassée.", sous: `Au moins une analyse des 15 derniers mois a dépassé la limite : ${over.map((c) => c.label.toLowerCase()).join(", ")}. Suivez les avis de votre mairie et de l'agence régionale de santé.` };
@@ -76,6 +78,46 @@ export function verdict(u, crit) {
     E: ["Elle est potable, mais de qualité médiocre.", "Elle respecte les limites, mais fait partie des eaux les plus chargées en polluants."],
   }[L];
   return { k: "ok", titre: T[0], sous: detail || T[1] };
+}
+
+// ---------- Avis de l'agence régionale de santé (peut-on la boire ?) ----------
+// u.ars = { k: ban | boil | risk | ok | conf | none, old: consigne peut-être levée, d: date, t: texte officiel, g: personnes visées (risk) }
+const jourFr = (iso) => { const [y, m, d] = iso.split("-").map(Number); return `${d === 1 ? "1er" : d} ${MOIS[m - 1]} ${y}`; };
+const ARS_ICO = {
+  ban: '<path d="M12 3l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.2v.3"/>',
+  boil: '<path d="M5 11h14v4a5 5 0 0 1-5 5h-4a5 5 0 0 1-5-5z"/><path d="M19 13h2M9 4c-.8 1 .8 2 0 3.2M13 4c-.8 1 .8 2 0 3.2"/>',
+  risk: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.2v.3"/>',
+  ok: '<circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.7 2.7L16.2 9.5"/>',
+  none: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.7v.3"/>',
+  past: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/>',
+};
+export function arsAdvice(u) {
+  const a = u.ars;
+  if (!a || !a.t) return null;
+  const quand = `Avis de l'agence régionale de santé du ${jourFr(a.d)}`;
+  const qui = `aux ${(a.g || ["personnes fragiles"]).join(" et aux ")}`;
+  if (a.old) {
+    // consigne qui n'apparaît plus dans les derniers avis, ou trop ancienne pour être sûre
+    const t = { ban: `Le ${jourFr(a.d)}, l'agence régionale de santé a demandé de ne pas la boire.`,
+      boil: `Le ${jourFr(a.d)}, l'agence régionale de santé a demandé de la faire bouillir avant de la boire.`,
+      risk: `Le ${jourFr(a.d)}, l'agence régionale de santé l'a déconseillée ${qui}.` }[a.k];
+    return { k: "past", titre: t, sous: "Ce n'est peut-être plus le cas aujourd'hui : demandez à votre mairie si cette consigne est toujours en vigueur." };
+  }
+  if (a.k === "ban") return { k: "ban", titre: "Ne buvez pas l'eau du robinet pour l'instant.", sous: `${quand}. Suivez les consignes de votre mairie : la restriction dure jusqu'à une analyse de nouveau conforme.` };
+  if (a.k === "boil") return { k: "boil", titre: "Faites bouillir l'eau avant de la boire.", sous: `${quand}. Suivez les consignes de votre mairie jusqu'au retour à la normale.` };
+  if (a.k === "risk") return { k: "risk", titre: `Déconseillée ${qui}.`, sous: `${quand}. Pas de restriction pour les autres personnes.` };
+  if (a.k === "ok") return { k: "ok", titre: "Elle peut être bue par tous.", sous: `${quand}.` };
+  if (a.k === "conf") return { k: "ok", titre: "Conforme lors de la dernière analyse.", sous: `${quand}.` };
+  return { k: "none", titre: "Ce que dit l'agence régionale de santé", sous: `${quand}.` };
+}
+function arsBlock(u) {
+  const v = arsAdvice(u);
+  if (!v) return "";
+  return `<div class="ars ars-${v.k}">
+    <span class="ars-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ARS_ICO[v.k]}</svg></span>
+    <div class="ars-txt"><b>${esc(v.titre)}</b><span>${esc(v.sous)}</span>
+    <details><summary>Lire l'avis officiel</summary><blockquote>${esc(u.ars.t)}</blockquote></details></div>
+  </div>`;
 }
 
 const calc = (th) => (th == null ? null : th < 15 ? "Peu calcaire" : th < 25 ? "Moyennement calcaire" : th < 35 ? "Calcaire" : "Très calcaire");
@@ -199,6 +241,7 @@ export function renderCity(d) {
     <div class="h-ans">
       ${strip(u.L)}
       <div class="verdict"><h2>${v.titre}</h2></div>
+      ${arsBlock(u)}
       <button type="button" class="next-btn" data-fiche>Plus de détails sur l'eau de ${esc(c.nom)}${arrowDown}</button>
     </div>
   </div>
@@ -396,6 +439,8 @@ export function renderAbout(meta) {
         <article class="gcard"><div class="gtop">${ico("map")}<span class="t">Un réseau, une eau</span></div><span class="d">Les analyses sont faites par « unité de distribution » : une portion de réseau où l'eau vient de la même source et reçoit le même traitement. Une commune peut être desservie par plusieurs réseaux selon le quartier.</span></article>
         <article class="gcard"><div class="gtop">${ico("ctrl")}<span class="t">Le réseau principal</span></div><span class="d">La note d'une commune est celle de son réseau le plus contrôlé : la fréquence des contrôles suit le volume d'eau distribué. Les autres réseaux restent consultables sur la page de la commune.</span></article>
       </div>
+      <h2 class="rk-h2 ab-h">Peut-on la boire ? L'avis de l'agence régionale de santé</h2>
+      <p class="ab-lead">La note compare la qualité des eaux. Mais la décision de boire ou non l'eau du robinet revient à l'agence régionale de santé (ARS), qui joint un avis à chaque analyse. Quand cet avis restreint la consommation (ne pas boire, faire bouillir, déconseillée aux femmes enceintes ou aux nourrissons), nous l'affichons en tête de la page de la commune, avec sa date et le texte officiel. Si la consigne n'apparaît plus dans les derniers avis, nous le signalons : seule votre mairie peut confirmer qu'elle a été levée.</p>
       <h2 class="rk-h2 ab-h">Ce qui n'entre pas dans la note</h2>
       <div class="why two">
         <article class="gcard"><div class="gtop">${ico("calc")}<span class="t">Calcaire</span></div><span class="d">Il n'a pas d'effet sur la santé. Il joue seulement sur le goût et sur les traces blanches dans la bouilloire.</span></article>
