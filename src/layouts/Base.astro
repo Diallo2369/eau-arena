@@ -2,7 +2,7 @@
 import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "@fontsource-variable/schibsted-grotesk/index.css";
 import "../styles/site.css";
-import { SITE_NAME, SITE_URL, INDEXABLE, CONTACT } from "../lib/site.js";
+import { SITE_NAME, SITE_URL, INDEXABLE, CONTACT, ANALYTICS_TOKEN } from "../lib/site.js";
 import { load } from "../lib/data.js";
 import { ADS } from "../lib/ads.js";
 
@@ -79,5 +79,6 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   <script type="application/json" id="boot" set:html={boot} />
   {pageData && <script type="application/json" id="pd" set:html={JSON.stringify(pageData)} />}
   <script src="../scripts/app.js"></script>
+  {INDEXABLE && ANALYTICS_TOKEN && <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={JSON.stringify({ token: ANALYTICS_TOKEN, spa: true })}></script>}
 </body>
 </html>

@@ -33,7 +33,7 @@ LIMIT_PAGES=300 npm run build   # construction rapide avec les 300 communes les 
 | `scripts/prepare_data.py` | règles de calcul : période, critères, note, réseau principal, classement |
 | `scripts/check_data.mjs` | bloque la construction si les données sont incomplètes ou mal encodées |
 | `src/lib/core.js` | **tout le rendu des pages** et les textes, partagé entre la construction et le navigateur |
-| `src/lib/site.js` | réglages : nom du site, adresse de contact |
+| `src/lib/site.js` | réglages : nom du site, adresse de contact, jeton de mesure d'audience Cloudflare Web Analytics (sans cookie) |
 | `src/lib/ads.js` | **publicité** : interrupteur, identifiants AdSense, emplacements |
 | `src/scripts/app.js` | navigation sans rechargement, recherche, fioles, classement, animations |
 | `src/styles/site.css` | tout le style |
