@@ -638,3 +638,14 @@ body[data-page="home"] .find-btn{display:none}
 .sov .sugg{position:relative;top:auto;margin-top:10px;max-height:calc(100dvh - 160px);overflow:auto}
 body.sov-on{overflow:hidden}
 @media (max-width:640px){.sov{background:var(--deep)}.sov-panel{box-shadow:none}}
+
+/* Les sites Arena (bloc commun à tous les sites de la famille, mêmes valeurs qu'ailleurs en mode clair) */
+.site-foot .arena-sites{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px 20px;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid rgba(0,0,0,.08);font-size:12px;color:#6b6475}
+.arena-sites .arena-k{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.site-foot .arena-sites a{color:inherit;text-decoration:none}
+.arena-sites a b{color:#1c1220}
+.site-foot .arena-sites a:hover b{text-decoration:underline}
+@media (prefers-color-scheme: dark){
+  .site-foot .arena-sites{color:#A9B6C4;border-bottom-color:rgba(255,255,255,.1)}
+  .arena-sites a b{color:#F2F6FA}
+}

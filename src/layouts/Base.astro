@@ -64,6 +64,12 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   </div>
   <main id="app" tabindex="-1"><slot /></main>
   <footer class="site-foot"><div class="wrap">
+    <!-- Les sites Arena : même éditeur, liens visibles et peu nombreux -->
+    <nav aria-label="Les sites Arena" class="arena-sites">
+      <span class="arena-k">Les sites Arena</span>
+      <a href="https://jobarena.org/"><b>Job Arena</b> · les métiers face à l'IA</a>
+      <a href="https://scolarena.fr/"><b>Scol Arena</b> · collèges et lycées</a>
+    </nav>
     <p><b>Eau Arena</b> · Les analyses officielles de l'eau du robinet, expliquées simplement.</p>
     <p class="foot-links"><a href="/a-propos/">À propos</a> · <a href="/mentions-legales/">Mentions légales</a> · <a href="/confidentialite/">Confidentialité</a></p>
     {CONTACT && <p>Une question, une erreur à signaler : <a href={`mailto:${CONTACT}`}>{CONTACT}</a></p>}
