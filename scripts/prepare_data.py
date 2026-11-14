@@ -255,10 +255,21 @@ def main():
     for v in rank.values():
         ties[v] += 1
 
+    # Calcaire (dureté, médiane en °f du réseau principal) pour l'article « eau calcaire » :
+    # répartition des communes selon les classes de l'ARS Pays de la Loire, et les 15 villes les plus peuplées.
+    th_rows = [(c, out_udi[c["main"]].get("th")) for c in noted]
+    th_rows = [(c, t) for c, t in th_rows if t is not None]
+    bands = [0, 0, 0, 0]
+    for _, t in th_rows:
+        bands[0 if t <= 10 else 1 if t <= 20 else 2 if t <= 30 else 3] += 1
+    big15 = sorted(noted, key=lambda c: -c["pop"])[:15]
+    th_meta = {"bands": bands, "n": len(th_rows),
+               "big": [[c["c"], c["nom"], out_udi[c["main"]].get("th")] for c in big15]}
+
     os.makedirs(BUILD, exist_ok=True)
     os.makedirs(os.path.join(PUBLIC, "dep"), exist_ok=True)
     meta = {"start": start.isoformat(), "end": last_date.isoformat(), "generated": dt.date.today().isoformat(),
-            "noted": len(noted), "communes": len(communes), "dist": dist, "years": ys}
+            "noted": len(noted), "communes": len(communes), "dist": dist, "years": ys, "th": th_meta}
 
     def pct(v, lim):
         return None if v is None else round(v / lim * 100)
@@ -280,7 +291,7 @@ def main():
             row.append(1 if a["k"] == "risk" else 2)  # consigne de l'ARS en cours : 2 ne pas boire, 1 déconseillée
         index.append(row)
     with open(os.path.join(PUBLIC, "index.json"), "w", encoding="utf-8") as f:
-        json.dump({"meta": {"start": meta["start"], "end": meta["end"], "noted": len(noted), "dist": dist},
+        json.dump({"meta": {"start": meta["start"], "end": meta["end"], "noted": len(noted), "dist": dist, "th": th_meta},
                    "deps": {k: deps[k] for k in sorted({c["dep"] for c in communes.values()}) if k in deps}, "c": index},
                   f, ensure_ascii=False, separators=(",", ":"))
 

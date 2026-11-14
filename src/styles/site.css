@@ -695,3 +695,19 @@ body.sov-on{overflow:hidden}
 .inl{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--ink)}
 .art-more{margin-top:48px}
 .anim .art-main>*{animation:rise .5s both}
+
+/* Dureté (calcaire) : 4 niveaux, du plus doux au plus calcaire */
+.th-0{background:#A9DDEE}.th-1{background:#56B6DC}.th-2{background:#2580B3}.th-3{background:#123F6B}
+@media (prefers-color-scheme: dark){.th-3{background:#5A8FC7}}
+.hb.th .hb-t b{height:100%}
+.th-leg{display:flex;flex-wrap:wrap;gap:6px 16px}
+.th-leg span,.th-legs span{display:inline-flex;align-items:center;gap:6px}
+.th-leg i,.th-legs i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.th-stack{margin-top:4px}
+.th-legs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;font-size:14.5px;color:var(--ink-2)}
+.th-legs span{flex-direction:column;align-items:flex-start;gap:2px}
+.th-legs b{display:inline-flex;align-items:center;gap:8px;font-family:var(--serif);font-size:22px;color:var(--ink)}
+.th-legs small{font-size:13px}
+.hb.th .hb-v{white-space:nowrap;min-width:52px;text-align:right}
+@media (max-width:620px){.th-legs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hb-foot.th-leg i{border:0;width:12px;height:12px;border-radius:3px;margin:0}

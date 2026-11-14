@@ -369,7 +369,31 @@ export function renderRanking(idx, meta, deps, st) {
 // Chaque actualité : chapô (txt), chiffre clé, corps, « ce que ça change pour vous », sources vérifiées,
 // et un encadré calculé à partir de nos données (data), pour que chaque page apporte quelque chose d'unique.
 const UFC_VILLES = [["75056", "Paris"], ["69123", "Lyon"], ["33063", "Bordeaux"], ["31555", "Toulouse"], ["76540", "Rouen"], ["80021", "Amiens"]];
+const TH_BANDS = [["Très peu calcaire", "jusqu'à 10 °f"], ["Peu calcaire", "de 10 à 20 °f"], ["Calcaire", "de 20 à 30 °f"], ["Très calcaire", "plus de 30 °f"]];
+const thBand = (t) => (t <= 10 ? 0 : t <= 20 ? 1 : t <= 30 ? 2 : 3);
+const fr1 = (x) => String(x).replace(".", ",");
 export const NEWS = [
+  { slug: "eau-calcaire-durete-grandes-villes", iso: "2026-11-14", date: "14 novembre 2026", tag: "Guide",
+    titre: "Eau calcaire : la dureté de l'eau du robinet dans les grandes villes",
+    txt: "Quelles grandes villes ont l'eau la plus calcaire, est-ce mauvais pour la santé, faut-il un adoucisseur ? Les réponses, avec les mesures officielles ville par ville.",
+    chiffre: (meta) => { const b = meta.th?.bands || [0, 0, 0, 0], n = b.reduce((x, y) => x + y, 0) || 1; return [`${Math.round(((b[2] + b[3]) / n) * 100)} %`, "des communes ont une eau calcaire ou très calcaire (plus de 20 °f)"]; },
+    sections: [
+      ["Qu'est-ce qu'une eau calcaire ?", [
+        "Une eau est dite calcaire, ou « dure », quand elle contient beaucoup de calcium et de magnésium, dissous en traversant des roches calcaires. On mesure cette dureté par le titre hydrotimétrique (TH), en degrés français (°f) : 1 °f correspond à 10 mg de carbonate de calcium par litre.",
+        "L'agence régionale de santé des Pays de la Loire classe les eaux en quatre niveaux : très peu calcaire jusqu'à 10 °f, peu calcaire de 10 à 20 °f, calcaire de 20 à 30 °f, très calcaire au-delà de 30 °f. C'est l'échelle utilisée dans cet article."]],
+      ["L'eau calcaire est-elle dangereuse pour la santé ?", [
+        "Non. Le calcaire n'a pas d'effet néfaste sur la santé : le calcium et le magnésium sont indispensables à l'organisme, et l'Anses rappelle que l'eau du robinet est une source de calcium. Il n'existe d'ailleurs pas de limite de santé pour la dureté de l'eau.",
+        "Son inconvénient est ailleurs : le tartre. Une eau très riche en calcium entartre les chauffe-eau, bouilloires et machines à laver, ce qui augmente la consommation d'énergie et réduit leur durée de vie. C'est pour cela que le calcaire ne compte pas dans la note d'Eau Arena : il est affiché à part, sur la page de chaque commune."]],
+      ["data"],
+      ["Faut-il installer un adoucisseur ?", [
+        "Pas forcément. Selon l'Anses, un traitement anti-tartre est rarement justifié quand la dureté est inférieure à 15 °f. Avant d'en installer un, il faut donc connaître la dureté de l'eau qui arrive chez soi.",
+        "Si vous en installez un, l'Anses recommande de garder un robinet d'eau froide non traitée pour la boisson et la cuisine, et d'entretenir régulièrement l'appareil."]],
+      ["Limiter le tartre au quotidien", [
+        "Réglez votre lave-vaisselle et votre lave-linge sur la dureté de votre eau : la plupart proposent ce réglage, et il dose le sel régénérant ou la lessive au plus juste. L'Eurométropole de Strasbourg conseille aussi de régler le thermostat du chauffe-eau à 55 °C au plus, car le tartre se dépose davantage dans l'eau très chaude."]],
+    ],
+    pourVous: "Pour connaître la dureté de l'eau chez vous, cherchez votre commune : elle est indiquée dans « Tout sur l'eau de… », à côté de la note et des autres critères.",
+    sources: [["Anses, procédés anti-tartre : recommandations (2019)", "https://www.anses.fr/fr/content/procedes-anti-tartre-non-conventionnels-les-recommandations-de-lanses"], ["ARS Pays de la Loire, carte de la dureté de l'eau", "https://www.pays-de-la-loire.ars.sante.fr/media/126618/download"], ["Eurométropole de Strasbourg, questions sur l'eau", "https://www.strasbourg.eu/eau-strasbourg-questions"]],
+    data: "thData" },
   { slug: "pfas-facture-eau", iso: "2026-02-10", date: "10 février 2026", tag: "Réglementation",
     titre: "Le contrôle des polluants éternels arrive sur la facture d'eau",
     txt: "Depuis janvier 2026, la recherche de 20 PFAS est obligatoire dans l'eau potable. Les collectivités financent ces analyses et en répercutent le coût sur les abonnés : environ 40 à 50 € hors taxes par analyse selon la FNCCR.",
@@ -459,7 +483,7 @@ export function renderNews(idx, meta) {
       <h2 class="rk-h2">Infographies</h2>
       <div class="icards">${INFOS.map((it) => `<a class="icard" href="${newsUrl(it.slug)}">${infoMini(it, idx, meta)}<h3>${it.titre}</h3><p>${it.court}</p><span class="more">Voir l'infographie${ARROW}</span></a>`).join("")}</div>
       <h2 class="rk-h2" style="margin-top:48px">Actualités</h2>
-      <div class="news">${NEWS.map((n) => `<a class="ncard" href="${newsUrl(n.slug)}"><div class="nmeta"><span class="ntag">${n.tag}</span><time datetime="${n.iso}">${n.date}</time></div><h3>${n.titre}</h3><p class="nkey"><b>${n.chiffre[0]}</b> ${n.chiffre[1]}</p><p>${n.txt}</p><span class="more">Lire l'article${ARROW}</span></a>`).join("")}</div>
+      <div class="news">${NEWS.map((n) => `<a class="ncard" href="${newsUrl(n.slug)}"><div class="nmeta"><span class="ntag">${n.tag}</span><time datetime="${n.iso}">${n.date}</time></div><h3>${n.titre}</h3>${((c) => `<p class="nkey"><b>${c[0]}</b> ${c[1]}</p>`)(typeof n.chiffre === "function" ? n.chiffre(meta) : n.chiffre)}<p>${n.txt}</p><span class="more">Lire l'article${ARROW}</span></a>`).join("")}</div>
       <p class="cmp-leg">Infographies calculées à partir du contrôle sanitaire des agences régionales de santé, ${period(meta)}.</p>
     </div>`;
 }
@@ -472,6 +496,22 @@ function newsData(n, idx, meta) {
     const over = m.filter((r) => r[7] > 100).length, half = m.filter((r) => r[7] >= 50).length;
     return `<p>Sur les ${fmtInt(noted.length)} communes suivies par Eau Arena, <b>${fmtInt(m.length)}</b> ont déjà au moins une analyse des 20 PFAS ${period(meta)}. ${fmtInt(over)} dépassent la limite de 0,1 µg/L au moins une fois, et ${fmtInt(half)} atteignent la moitié de la limite.</p>
       <p><a class="inl" href="${newsUrl("pfas-grandes-villes")}">Voir les polluants éternels dans les grandes villes${ARROW}</a></p>`;
+  }
+  if (n.data === "thData") {
+    const th = meta.th;
+    if (!th) return "";
+    const rows = th.big.filter((r) => r[2] != null).sort((a, b) => b[2] - a[2]);
+    const max = 40, tot = th.bands.reduce((x, y) => x + y, 0) || 1;
+    const top = rows.slice(0, 3).map((r) => r[1]), soft = rows.filter((r) => r[2] <= 15).map((r) => r[1]);
+    const list = (a) => a.join(", ").replace(/, ([^,]*)$/, " et $1");
+    return `<p>Dureté de l'eau du robinet dans les 15 villes les plus peuplées : valeur médiane des analyses ${period(meta)}, en degrés français.</p>
+      <figure class="chart"><div class="hb th">${rows.map(([code, nom, t], i) => `<a class="hb-row" href="${cityUrl(nom, code)}"><span class="hb-n">${esc(nom)}</span><span class="hb-t"><b class="th-${thBand(t)}" data-w="${Math.min(100, (t / max) * 100)}" style="width:${Math.min(100, (t / max) * 100)}%;transition-delay:${i * 50}ms"></b></span><span class="hb-v">${fr1(t)} °f</span></a>`).join("")}</div>
+        <p class="hb-foot th-leg">${TH_BANDS.map(([l], i) => `<span><i class="th-${i}"></i>${l}</span>`).join("")}</p></figure>
+      <p>L'eau la plus calcaire de ces grandes villes coule à <b>${esc(list(top))}</b>.${soft.length ? ` À l'inverse, ${esc(list(soft))} ${soft.length > 1 ? "ont" : "a"} une eau peu calcaire, sous 15 °f.` : ""} Les régions de roches calcaires (Bassin parisien, Nord, Est, pourtour méditerranéen) ont souvent une eau plus dure que les massifs anciens comme la Bretagne ou le Massif central.</p>
+      <h2>Et dans toute la France ?</h2>
+      <p>Répartition des ${fmtInt(tot)} communes selon la dureté de l'eau de leur réseau principal.</p>
+      <div class="stack th-stack" role="img" aria-label="${TH_BANDS.map(([l], i) => `${th.bands[i]} communes : ${l.toLowerCase()}`).join(", ")}">${th.bands.map((v, i) => `<span class="th-${i}" data-w="${(v / tot) * 100}" style="width:${(v / tot) * 100}%;transition-delay:${i * 90}ms"></span>`).join("")}</div>
+      <div class="th-legs">${TH_BANDS.map(([l, r], i) => `<span><b><i class="th-${i}"></i>${Math.round((th.bands[i] / tot) * 100)} %</b>${l}<small>${r}</small></span>`).join("")}</div>`;
   }
   if (n.data === "ufcCities") {
     const byCode = new Map(idx.map((r) => [r[0], r]));
@@ -507,7 +547,7 @@ function infoBody(it, idx, meta) {
 export function renderNewsItem(slug, idx, meta) {
   const n = newsItem(slug);
   if (!n) return "";
-  const isInfo = !n.corps;
+  const isInfo = !n.corps && !n.sections;
   const crumbs = `<nav class="crumbs" aria-label="Fil d'Ariane"><a href="/">Accueil</a><span aria-hidden="true">›</span><a href="/actualites/">Actualités</a><span aria-hidden="true">›</span><span>${isInfo ? "Infographie" : n.tag}</span></nav>`;
   const others = (isInfo ? INFOS : NEWS).filter((x) => x.slug !== slug);
   const head = `<section class="deep"><div class="wrap rk-hero art-hero">${crumbs}
@@ -524,14 +564,15 @@ export function renderNewsItem(slug, idx, meta) {
     </div>`;
   }
   const data = newsData(n, idx, meta);
+  const key = typeof n.chiffre === "function" ? n.chiffre(meta) : n.chiffre;
+  // Deux formats : un article d'actualité (corps) ou un guide en sections (sections, avec ["data"] à la place des chiffres)
+  const body = n.sections
+    ? n.sections.map(([h, ps]) => (h === "data" ? `<h2>Dans quelles grandes villes l'eau est-elle la plus calcaire ?</h2>${data}` : `<h2>${h}</h2>${ps.map((p) => `<p>${p}</p>`).join("")}`)).join("") + `<h2>Connaître la dureté de l'eau chez vous</h2><p>${n.pourVous}</p>`
+    : `<h2>Ce qu'il faut retenir</h2>${n.corps.map((p) => `<p>${p}</p>`).join("")}<h2>Ce que ça change pour vous</h2><p>${n.pourVous}</p>${data ? `<h2>Ce que disent les analyses officielles</h2>${data}` : ""}`;
   return `${head}<div class="wrap art">
     <div class="art-main">
-      <div class="art-key"><b>${n.chiffre[0]}</b><span>${n.chiffre[1]}</span></div>
-      <h2>Ce qu'il faut retenir</h2>
-      ${n.corps.map((p) => `<p>${p}</p>`).join("")}
-      <h2>Ce que ça change pour vous</h2>
-      <p>${n.pourVous}</p>
-      ${data ? `<h2>Ce que disent les analyses officielles</h2>${data}` : ""}
+      <div class="art-key"><b>${key[0]}</b><span>${key[1]}</span></div>
+      ${body}
       ${cta}
       <h2>Sources</h2>
       <ul class="art-src">${n.sources.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${t}${EXT}</a></li>`).join("")}</ul>
