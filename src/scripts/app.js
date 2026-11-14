@@ -2,7 +2,7 @@
 // Les pages sont reconstruites ici avec les mêmes fonctions que celles de la construction (lib/core.js).
 // Données : l'index des communes est chargé en tâche de fond ; le détail d'une commune vient du fichier
 // de son département, chargé à l'arrivée sur la commune (ou en avance, au survol d'un lien).
-import { renderHome, renderCity, renderRanking, rankFilter, rankRows, renderNews, renderNewsItem, newsItem, renderAbout, cityFromDep, seo, alertTag,
+import { renderHome, renderCity, renderRanking, rankFilter, rankRows, renderNews, renderNewsItem, newsItem, renderDep, depFromPath, renderAbout, cityFromDep, seo, alertTag,
   depOf, norm, esc, gr, cityUrl } from "../lib/core.js";
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -33,6 +33,7 @@ function routeOf(path) {
   const m = path.match(/^\/actualites\/([a-z0-9-]+)\/$/);
   if (m && newsItem(m[1])) return "newsItem";
   if (path === "/a-propos/") return "about";
+  if (depFromPath(path)) return "dep";
   if (codeFromPath(path)) return "city";
   return null;
 }
@@ -62,7 +63,8 @@ async function render(path, { push = false, scrollTo = "top", hash = "" } = {}) 
   loading(true);
   try {
     let html, head;
-    if (page === "home") { html = renderHome(boot.popular); head = seo("home"); }
+    if (page === "home") { const idx = await loadIndex().catch(() => null); html = renderHome(boot.popular, idx && { meta: boot.meta, deps, big: idx.filter((r) => r[2]).slice(0, 20) }); head = seo("home"); }
+    else if (page === "dep") { const code = depFromPath(path); const idx = await loadIndex(); if (!deps[code]) { location.href = path; return; } html = renderDep(code, deps[code], idx, boot.meta); head = seo("dep", { code, nom: deps[code] }); }
     else if (page === "about") { html = renderAbout(boot.meta); head = seo("about"); }
     else if (page === "news") { const idx = await loadIndex(); html = renderNews(idx, boot.meta); head = seo("news"); }
     else if (page === "newsItem") { const slug = path.split("/")[2]; const idx = await loadIndex(); html = renderNewsItem(slug, idx, boot.meta); head = seo("newsItem", { slug }); }
@@ -126,7 +128,7 @@ function enter(page) {
   if (page === "home" || page === "city") bindSearch();
   if (page === "city") { bindCity(); fill(); }
   if (page === "rank") bindRank();
-  if (page === "news" || page === "newsItem") animBars();
+  if (page === "news" || page === "newsItem" || page === "dep") animBars();
 }
 
 // Recherche : la même logique sert au champ en haut des pages et au panneau ouvert depuis la barre du haut

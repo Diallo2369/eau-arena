@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { renderCity, seo } from "../../lib/core.js";
+import { renderCity, seo, depUrl } from "../../lib/core.js";
+import { SITE_URL } from "../../lib/site.js";
 import { load, cityData } from "../../lib/data.js";
 
 export function getStaticPaths() {
@@ -15,7 +16,11 @@ const d = cityData(code);
 const u = d.c.main ? d.u[d.c.main] : null;
 const s = seo("city", { nom: d.c.nom, dep: d.c.dep, L: u?.L, year: meta.end.slice(0, 4) });
 const pageData = { code, ...d };
+const jsonld = SITE_URL && d.c.depNom ? { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+  { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL + "/" },
+  { "@type": "ListItem", position: 2, name: `${d.c.depNom} (${d.c.dep})`, item: SITE_URL + depUrl(d.c.dep, d.c.depNom) },
+  { "@type": "ListItem", position: 3, name: d.c.nom, item: SITE_URL + Astro.url.pathname }] } : null;
 ---
-<Base title={s.title} description={s.desc} page="city" pageData={pageData} noindex={!u}>
+<Base title={s.title} description={s.desc} page="city" pageData={pageData} noindex={!u} jsonld={jsonld}>
   <Fragment set:html={renderCity({ ...d, noted: meta.noted })} />
 </Base>

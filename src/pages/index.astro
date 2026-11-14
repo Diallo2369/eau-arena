@@ -1,8 +1,10 @@
 ---
 import Base from "../layouts/Base.astro";
-import { renderHome, seo } from "../lib/core.js";
+import { renderHome, seo, depOf } from "../lib/core.js";
 import { load } from "../lib/data.js";
-const { index } = load();
+const { index, meta, depNames } = load();
+const deps = Object.fromEntries([...new Set(index.map((r) => depOf(r[0])))].filter((c) => depNames[c]).map((c) => [c, depNames[c]]));
+const big = index.filter((r) => r[2]).slice(0, 20);
 const s = seo("home");
 ---
-<Base title={s.title} description={s.desc} page="home"><Fragment set:html={renderHome(index.filter((r) => r[2]).slice(0, 6))} /></Base>
+<Base title={s.title} description={s.desc} page="home"><Fragment set:html={renderHome(index.filter((r) => r[2]).slice(0, 6), { meta, deps, big })} /></Base>

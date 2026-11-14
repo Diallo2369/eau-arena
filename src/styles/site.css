@@ -711,3 +711,36 @@ body.sov-on{overflow:hidden}
 .hb.th .hb-v{white-space:nowrap;min-width:52px;text-align:right}
 @media (max-width:620px){.th-legs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .hb-foot.th-leg i{border:0;width:12px;height:12px;border-radius:3px;margin:0}
+
+/* Accueil : la qualité de l'eau en France, grandes villes et départements (liens pour Google et pour naviguer) */
+.hm-more{margin-top:56px;padding-top:40px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.hm-more h2{font-family:var(--serif);font-weight:800;font-size:clamp(26px,3.4vw,34px);letter-spacing:-.02em}
+.hm-more h3{font-family:var(--serif);font-weight:800;font-size:21px;margin-top:20px}
+.hm-lead{font-size:17px;line-height:1.6;color:var(--ink-2);max-width:72ch}
+.hm-links-p{display:flex;flex-wrap:wrap;gap:10px 24px}
+.hm-cities{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.hm-cities a{display:flex;align-items:center;gap:10px;padding:8px 12px 8px 8px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font-weight:600;text-decoration:none}
+.hm-cities a:hover{border-color:color-mix(in srgb,var(--water) 45%,var(--line))}
+.hm-cities .g{width:30px;height:30px;font-size:16px;border-radius:9px;flex:none}
+.hm-deps{list-style:none;padding:0;margin:0;columns:4 200px;column-gap:24px;font-size:15px}
+.hm-deps li{break-inside:avoid;padding:3px 0}
+.hm-deps a{color:var(--ink-2);text-decoration:none}
+.hm-deps a:hover{color:var(--ink);text-decoration:underline}
+.hm-deps b{display:inline-block;min-width:30px;color:var(--ink);font-variant-numeric:tabular-nums}
+/* Page département */
+.dep{display:flex;flex-direction:column;gap:16px}
+.dep .rk-h2{margin-top:32px}
+.dep-figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dep-figs>div{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.dep-figs b{font-family:var(--serif);font-weight:800;font-size:30px;letter-spacing:-.02em;color:var(--ink)}
+.dep-figs span{font-size:14.5px;color:var(--ink-2);line-height:1.4}
+@media (max-width:720px){.dep-figs{grid-template-columns:minmax(0,1fr)}}
+.dep-all{columns:4 210px;column-gap:28px}
+.dep-all>div{break-inside:avoid;margin-bottom:14px}
+.dep-all h3{font-family:var(--serif);font-weight:800;font-size:18px;margin-bottom:4px}
+.dep-all ul{list-style:none;padding:0;margin:0}
+.dep-all li{padding:2px 0}
+.dep-all a{display:inline-flex;align-items:center;gap:8px;color:var(--ink-2);text-decoration:none;font-size:15px}
+.dep-all a:hover{color:var(--ink);text-decoration:underline}
+.dep-all .g{width:20px;height:20px;font-size:12px;border-radius:6px;flex:none}
+.city-crumbs{margin-bottom:10px}

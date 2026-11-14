@@ -32,6 +32,8 @@ export function slugify(nom, code) {
 }
 export const depOf = (code) => (code.startsWith("97") ? code.slice(0, 3) : code.slice(0, 2));
 export const cityUrl = (nom, code) => `/eau/${slugify(nom, code)}/`;
+export const depUrl = (code, nom) => `/departement/${slugify(nom, code)}/`;
+export const depFromPath = (path) => { const m = path.match(/^\/departement\/[a-z0-9-]+-([0-9][0-9ab]{1,2})\/$/); return m ? m[1].toUpperCase() : null; };
 export const rangTxt = (r) => (r === 1 ? "1re" : fmtInt(r) + "e");
 
 const lvl = (v, lim) => (v == null ? "na" : v / lim > 1 ? "bad" : v / lim > 0.8 ? "warn" : "ok");
@@ -209,7 +211,25 @@ export function searchBlock(city, popular) {
 }
 
 // ---------- Accueil ----------
-export function renderHome(popular) {
+// x : { popular, meta, deps: {code: nom}, big: [lignes d'index des plus grandes villes] }
+function homeMore(x) {
+  if (!x?.meta?.dist || !x.deps) return "";
+  const total = LETTERS.reduce((t, L) => t + (x.meta.dist[L] || 0), 0);
+  const pc = (L) => Math.round(((x.meta.dist[L] || 0) / total) * 100);
+  return `<section class="hm-more" aria-labelledby="qT">
+      <h2 id="qT">La qualité de l'eau du robinet en France</h2>
+      <p class="hm-lead">Eau Arena note l'eau du robinet de ${fmtInt(total)} communes, d'après les analyses officielles du contrôle sanitaire ${period(x.meta)}. ${pc("A") + pc("B")} % ont une eau de bonne qualité (A ou B), ${pc("E")} % une note E : une limite de santé dépassée au moins une fois, ou plusieurs critères proches de leur limite.</p>
+      <div class="stack" role="img" aria-label="${LETTERS.map((L) => `${pc(L)} % des communes en ${L}`).join(", ")}">${LETTERS.map((L) => `<span class="g-${L}" style="width:${((x.meta.dist[L] || 0) / total) * 100}%"></span>`).join("")}</div>
+      <div class="stack-leg">${LETTERS.map((L) => `<span>${gr(L)}<b>${pc(L)} %</b><small>${SHORT[L]}</small></span>`).join("")}</div>
+      <p class="hm-links-p"><a class="inl" href="/classement/">Classement des communes${ARROW}</a> <a class="inl" href="${newsUrl("qualite-eau-robinet-france")}">L'infographie${ARROW}</a></p>
+      ${x.big?.length ? `<h3>Qualité de l'eau du robinet dans les grandes villes</h3>
+      <ul class="hm-cities">${x.big.map((r) => `<li><a href="${cityUrl(r[1], r[0])}">${gr(r[2] || null)}<span>${esc(r[1])}</span></a></li>`).join("")}</ul>` : ""}
+      <h3>Qualité de l'eau du robinet par département</h3>
+      <ul class="hm-deps">${Object.entries(x.deps).sort(([a], [b]) => a.localeCompare(b)).map(([c, n]) => `<li><a href="${depUrl(c, n)}"><b>${c}</b> ${esc(n)}</a></li>`).join("")}</ul>
+    </section>`;
+}
+
+export function renderHome(popular, x = null) {
   return `${searchBlock(null, popular)}
   <div class="wrap">
     <section class="how-wrap" aria-labelledby="howT">
@@ -220,11 +240,13 @@ export function renderHome(popular) {
         <li class="step"><span class="n">3</span><div class="vis vis-tubes" aria-hidden="true"><i style="--h:20%"></i><i style="--h:62%" class="w"></i><i style="--h:35%"></i><i style="--h:12%"></i></div><h3>Comprenez le détail</h3><p>Microbes, nitrates, pesticides, polluants éternels : chaque critère comparé à sa limite de santé.</p></li>
       </ol>
     </section>
+    ${homeMore(x)}
     <p class="foot">Les données viennent du contrôle sanitaire des agences régionales de santé. ${NO_COOKIE ? "Aucune inscription, aucun cookie." : "Aucune inscription."} <a href="/a-propos/">Pourquoi ce site ?</a></p>
   </div>`;
 }
 
 // ---------- Page commune ----------
+const cityCrumbs = (c) => c.depNom ? `<nav class="crumbs city-crumbs" aria-label="Fil d'Ariane"><a href="/">Accueil</a><span aria-hidden="true">›</span><a href="${depUrl(c.dep, c.depNom)}">${esc(c.depNom)} (${c.dep})</a></nav>` : "";
 // d : { c (commune), u (réseaux du département), noted, others:[lignes d'index] , pick, sect }
 export function renderCity(d) {
   const c = d.c;
@@ -243,6 +265,7 @@ export function renderCity(d) {
   return `${searchBlock(c.nom)}
   <section class="deep res-top" id="resultat"><div class="wrap res hero2">
     <div>
+      ${cityCrumbs(c)}
       <h1><span class="kicker">L'eau du robinet à</span>${esc(c.nom)}</h1>
       ${multi ? `<p class="where">${isMain ? "Secteur principal" : "Secteur"} : ${esc(sName(c.sect.find((s) => s.id === sid)))}</p>` : ""}
     </div>
@@ -327,7 +350,7 @@ export function rankRows(list, st) {
   const p = (v) => (v < 0 ? "—" : v + " %");
   const k = (v) => (v < 0 ? "na" : v > 100 ? "bad" : v > 80 ? "warn" : "ok");
   return shown.map((e, i) => (i === 5 ? adSlot("rank") : "") + `<a class="rrow" href="${cityUrl(e[1], e[0])}" style="--i:${Math.min(i, 20)}"><span class="pos">${fmtInt(loc.get(e[0]))}</span>${gr(e[2])}<span class="nm"><b>${esc(e[1])}${alertTag(e[9])}</b><span>${depOf(e[0])}${e[8] ? `<i class="pp"> · ${fmtInt(e[8] * 1000)} hab.</i>` : ""}${nat ? ` · ${rangTxt(e[3])} en France` : ""}</span></span><span class="mets">${cell("Microbes", e[4] ? `${e[4]} fois` : "Aucun", e[4] ? "warn" : "ok")}${cell("Nitrates", p(e[5]), k(e[5]))}${cell("Pesticides", p(e[6]), k(e[6]))}${cell("Polluants éternels", p(e[7]), k(e[7]))}</span><span class="mobmb">${minibars(e)}</span>${chevR}</a>`).join("")
-    + (r.length > shown.length ? `<button type="button" class="more-rows" data-more>Afficher 50 communes de plus <small>(${fmtInt(r.length - shown.length)} restantes)</small></button>` : "");
+    + (!st.noMore && r.length > shown.length ? `<button type="button" class="more-rows" data-more>Afficher 50 communes de plus <small>(${fmtInt(r.length - shown.length)} restantes)</small></button>` : "");
 }
 export function renderRanking(idx, meta, deps, st) {
   const list = rankFilter(idx, st);
@@ -361,6 +384,43 @@ export function renderRanking(idx, meta, deps, st) {
       <div class="rhead" aria-hidden="true"><span>Rang</span><span></span><span>Commune</span><span class="hm"><span>Microbes</span><span>Nitrates</span><span>Pesticides</span><span>Polluants éternels</span></span><span></span></div>
       <div class="rlist" id="rlist">${rankRows(list, st)}</div>
       <p class="cmp-leg">${st.dep || st.scope !== "all" ? "Le rang est celui de la sélection affichée ; le rang en France figure sous chaque commune. " : ""}Valeurs les plus hautes des 15 derniers mois, en part de la limite de santé.</p>
+    </div>`;
+}
+
+// ---------- Page département ----------
+// Toutes les communes d'un département, à partir de l'index : chiffres, meilleures, moins bonnes, liste complète.
+export function renderDep(code, nom, idx, meta) {
+  const all = idx.filter((r) => depOf(r[0]) === code);
+  const noted = all.filter((r) => r[2]);
+  const n = noted.length || 1;
+  const cnt = (L) => noted.filter((r) => r[2] === L).length;
+  const pc = (L) => Math.round((cnt(L) / n) * 100);
+  const alerts = noted.filter((r) => r[9]);
+  const st = { scope: "all", dep: code, L: "", n: 10, noMore: true };
+  const list = rankFilter(idx, st);
+  const head = `<div class="rhead" aria-hidden="true"><span>Rang</span><span></span><span>Commune</span><span class="hm"><span>Microbes</span><span>Nitrates</span><span>Pesticides</span><span>Polluants éternels</span></span><span></span></div>`;
+  const big = noted.slice().sort((a, b) => b[8] - a[8]).slice(0, 8);
+  const byLetter = {};
+  for (const r of all.slice().sort((a, b) => a[1].localeCompare(b[1], "fr"))) (byLetter[r[1][0].normalize("NFD")[0].toUpperCase()] ||= []).push(r);
+  return `<section class="deep"><div class="wrap rk-hero art-hero">
+      <nav class="crumbs" aria-label="Fil d'Ariane"><a href="/">Accueil</a><span aria-hidden="true">›</span><span>${esc(nom)} (${code})</span></nav>
+      <h1>Qualité de l'eau du robinet : ${esc(nom)} (${code})</h1>
+      <p class="rk-sub">La note de l'eau du robinet des ${fmtInt(noted.length)} communes du département, d'après les analyses officielles du contrôle sanitaire ${period(meta)}.</p>
+    </div></section>
+    <div class="wrap rk-body dep">
+      <div class="dep-figs">
+        <div><b>${pc("A") + pc("B")} %</b><span>des communes ont une eau de bonne qualité (A ou B)</span></div>
+        <div><b>${fmtInt(cnt("E"))}</b><span>commune${cnt("E") > 1 ? "s ont" : " a"} une note E</span></div>
+        <div><b>${fmtInt(alerts.length)}</b><span>commune${alerts.length > 1 ? "s ont" : " a"} une consigne de l'ARS en cours (ne pas boire ou déconseillée)</span></div>
+      </div>
+      <div class="stack" role="img" aria-label="${LETTERS.map((L) => `${cnt(L)} communes en ${L}`).join(", ")}">${LETTERS.map((L, i) => `<span class="g-${L}" data-w="${(cnt(L) / n) * 100}" style="width:${(cnt(L) / n) * 100}%;transition-delay:${i * 90}ms"></span>`).join("")}</div>
+      <div class="stack-leg">${LETTERS.map((L) => `<span>${gr(L)}<b>${fmtInt(cnt(L))}</b><small>${SHORT[L]}</small></span>`).join("")}</div>
+      ${big.length > 1 ? `<h2 class="rk-h2">Les principales villes</h2><ul class="hm-cities">${big.map((r) => `<li><a href="${cityUrl(r[1], r[0])}">${gr(r[2])}<span>${esc(r[1])}</span>${alertTag(r[9])}</a></li>`).join("")}</ul>` : ""}
+      ${list.length > 10 ? `<h2 class="rk-h2">Les communes où l'eau est la meilleure</h2>${head}<div class="rlist">${rankRows(list, { ...st, desc: true })}</div>
+      <h2 class="rk-h2">Les communes où l'eau est la moins bonne</h2>${head}<div class="rlist">${rankRows(list, { ...st, desc: false })}</div>` : list.length ? `<h2 class="rk-h2">Les communes classées</h2>${head}<div class="rlist">${rankRows(list, { ...st, desc: true })}</div>` : ""}
+      <h2 class="rk-h2">Toutes les communes du département</h2>
+      <div class="dep-all">${Object.entries(byLetter).map(([L, rs]) => `<div><h3>${L}</h3><ul>${rs.map((r) => `<li><a href="${cityUrl(r[1], r[0])}">${gr(r[2] || null)}${esc(r[1])}</a></li>`).join("")}</ul></div>`).join("")}</div>
+      <p class="cmp-leg">Chaque commune prend la note de son réseau principal. Rang : position dans le département ; le rang en France figure sous chaque commune.</p>
     </div>`;
 }
 
@@ -659,12 +719,13 @@ export function seo(kind, x) {
   const y = x?.year || "";
   switch (kind) {
     case "city": return {
-      title: `Eau du robinet à ${x.nom} (${x.dep}) : qualité ${y}, note ${x.L || "—"}`,
+      title: x.L ? `Qualité de l'eau du robinet à ${x.nom} (${x.dep}) : note ${x.L} en ${y}` : `Qualité de l'eau du robinet à ${x.nom} (${x.dep})`,
       desc: x.L ? `L'eau du robinet à ${x.nom} est-elle bonne ? Note ${x.L}, nitrates, pesticides, polluants éternels (PFAS), microbes : les analyses officielles expliquées simplement.` : `Qualité de l'eau du robinet à ${x.nom} : analyses officielles du contrôle sanitaire.` };
     case "rank": return { title: `Classement de l'eau du robinet ${y} : les meilleures et les moins bonnes communes`, desc: "Où l'eau du robinet est-elle la meilleure ? Classement national des communes selon les analyses officielles : microbes, nitrates, pesticides, polluants éternels." };
     case "news": return { title: "Eau du robinet : actualités et infographies sur les PFAS et les nitrates", desc: "Contrôle des polluants éternels, nitrates dans les grandes villes, répartition des notes : l'actualité de l'eau du robinet en chiffres." };
     case "newsItem": { const n = newsItem(x.slug); return { title: n.titre, desc: cut(n.txt || `${n.court} Valeurs officielles du contrôle sanitaire, ville par ville.`, 160) }; }
     case "about": return { title: "Pourquoi ce site ? Méthode et sources", desc: "Comment Eau Arena lit les analyses officielles de l'eau du robinet : critères, limites de santé, note de A à E." };
-    default: return { title: "Mon eau du robinet est-elle bonne ? Qualité de l'eau par commune", desc: "Renseignez votre commune : une réponse simple et une note de A à E, d'après les analyses officielles de l'eau du robinet. Nitrates, pesticides, PFAS." };
+    case "dep": return { title: `Qualité de l'eau du robinet : ${x.nom} (${x.code}), toutes les communes`, desc: `${x.nom} (${x.code}) : quelle est la qualité de l'eau du robinet dans votre commune ? Note de A à E, meilleures et moins bonnes communes, consignes de l'ARS, d'après les analyses officielles.` };
+    default: return { title: "Qualité de l'eau du robinet : la note de votre commune | Eau Arena", desc: "Quelle est la qualité de l'eau du robinet chez vous ? Une réponse simple et une note de A à E pour chaque commune de France, d'après les analyses officielles : nitrates, pesticides, PFAS." };
   }
 }
