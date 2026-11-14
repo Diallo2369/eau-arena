@@ -6,7 +6,7 @@ import { SITE_NAME, SITE_URL, INDEXABLE, CONTACT, ANALYTICS_TOKEN } from "../lib
 import { load } from "../lib/data.js";
 import { ADS } from "../lib/ads.js";
 
-const { title, description, page, pageData = null, noindex = false } = Astro.props;
+const { title, description, page, pageData = null, noindex = false, jsonld = null } = Astro.props;
 const { meta, index } = load();
 const popular = index.filter((r) => r[2]).slice(0, 6);
 const boot = JSON.stringify({ meta, popular });
@@ -35,6 +35,7 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="theme-color" content="#0A3554" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  {jsonld && <script type="application/ld+json" set:html={JSON.stringify(jsonld)} />}
   {ADS.enabled && ADS.client && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADS.client}`} crossorigin="anonymous"></script>}
 </head>
 <body data-page={page}>

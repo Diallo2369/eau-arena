@@ -647,3 +647,51 @@ body.sov-on{overflow:hidden}
   .site-foot .arena-sites{color:#A9B6C4;border-bottom-color:rgba(255,255,255,.1)}
   .arena-sites a b{color:#F2F6FA}
 }
+
+/* Actualités : cartes cliquables et pages dédiées */
+.icards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media (max-width:1100px){.icards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.icards{grid-template-columns:minmax(0,1fr)}}
+.icard,a.ncard{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px 22px;color:inherit;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
+.icard:hover,a.ncard:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(10,53,84,.1);border-color:color-mix(in srgb,var(--water) 45%,var(--line))}
+.icard:focus-visible,a.ncard:focus-visible{outline:3px solid var(--water);outline-offset:2px}
+.icard h3{font-family:var(--serif);font-weight:800;font-size:19px;line-height:1.2;letter-spacing:-.01em}
+.icard p{font-size:15px;line-height:1.5;color:var(--ink-2)}
+.more{margin-top:auto;display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:14.5px;color:var(--ink)}
+.icard:hover .more svg,a.ncard:hover .more svg{transform:translateX(3px)}
+.more svg{transition:transform .2s}
+.nkey{font-size:15px;color:var(--ink-2);line-height:1.45}
+.nkey b{display:block;font-family:var(--serif);font-weight:800;font-size:26px;letter-spacing:-.02em;color:var(--ink);line-height:1.1}
+.mini-stack{display:flex;height:16px;border-radius:8px;overflow:hidden;margin-block:6px 4px}
+.mini-stack i{display:block;height:100%}
+.mini-bars{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.mini-bars>span{display:grid;grid-template-columns:78px minmax(0,1fr);align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.mini-bars em{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-bars i{display:block;height:8px;border-radius:4px;background:var(--page);overflow:hidden}
+.mini-bars b{display:block;height:100%;border-radius:4px}
+.anim .icard{animation:rise .5s both}.anim .icards .icard:nth-child(2){animation-delay:.06s}.anim .icards .icard:nth-child(3){animation-delay:.12s}.anim .icards .icard:nth-child(4){animation-delay:.18s}
+
+.crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:14px;color:var(--on-deep-2);margin-bottom:18px}
+.crumbs a{color:var(--on-deep);text-decoration:underline;text-underline-offset:3px}
+.art-hero h1{max-width:22ch;font-size:clamp(30px,5vw,50px);line-height:1.06}
+.nmeta.on-deep{color:var(--on-deep-2);margin-bottom:14px}
+.nmeta.on-deep .ntag{background:rgba(255,255,255,.14);color:var(--on-deep)}
+.art{padding-block:40px 24px}
+.art-main{max-width:70ch;display:flex;flex-direction:column;gap:16px}
+.art-main h2{font-family:var(--serif);font-weight:800;font-size:clamp(22px,2.8vw,27px);letter-spacing:-.02em;margin-top:18px}
+.art-main p{font-size:17.5px;line-height:1.65;color:var(--ink-2)}
+.art-main p b{color:var(--ink)}
+.art-main .chart{max-width:none}
+.art-key{display:flex;flex-direction:column;gap:4px;padding:20px 24px;border-radius:20px;background:color-mix(in srgb,var(--water) 10%,var(--card));border:1px solid color-mix(in srgb,var(--water) 35%,var(--line))}
+.art-key b{font-family:var(--serif);font-weight:800;font-size:clamp(30px,5vw,42px);letter-spacing:-.03em;line-height:1.05;color:var(--ink)}
+.art-key span{font-size:16px;color:var(--ink-2)}
+.art-cta{margin-top:18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 20px;padding:20px 24px;border-radius:20px;background:var(--deep);color:var(--on-deep)}
+.art-main .art-cta p{color:var(--on-deep-2);font-size:16px;max-width:40ch}
+.art-main .art-cta p b{color:var(--on-deep)}
+.btn-cta{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:24px;background:#fff;color:#0A3554;font-weight:700;text-decoration:none;white-space:nowrap}
+.btn-cta:hover{background:#E6F4FA}
+.art-src{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.art-src a{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--ink)}
+.inl{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--ink)}
+.art-more{margin-top:48px}
+.anim .art-main>*{animation:rise .5s both}

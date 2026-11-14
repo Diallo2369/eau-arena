@@ -365,38 +365,190 @@ export function renderRanking(idx, meta, deps, st) {
 }
 
 // ---------- Actualités ----------
+// Une page par actualité et par infographie (/actualites/<slug>/), un aperçu en carte sur /actualites/.
+// Chaque actualité : chapô (txt), chiffre clé, corps, « ce que ça change pour vous », sources vérifiées,
+// et un encadré calculé à partir de nos données (data), pour que chaque page apporte quelque chose d'unique.
+const UFC_VILLES = [["75056", "Paris"], ["69123", "Lyon"], ["33063", "Bordeaux"], ["31555", "Toulouse"], ["76540", "Rouen"], ["80021", "Amiens"]];
 export const NEWS = [
-  { date: "10 février 2026", tag: "Réglementation", titre: "Le contrôle des polluants éternels arrive sur la facture d'eau", txt: "Depuis janvier 2026, la recherche de 20 PFAS est obligatoire dans l'eau potable. Les collectivités financent ces analyses et en répercutent le coût sur les abonnés : environ 40 à 50 € hors taxes par analyse selon la FNCCR.", src: "Weka, d'après l'AFP", url: "https://www.weka.fr/actualite/sante/article/detection-des-pfas-une-nouvelle-ligne-dans-la-facture-d-eau-210502/" },
-  { date: "24 décembre 2025", tag: "Réglementation", titre: "Un arrêté fixe la liste des polluants éternels à rechercher", txt: "Paru au Journal officiel, il rend obligatoire la recherche de 20 PFAS dans l'eau du robinet à partir du 12 janvier 2026. Le TFA, un polluant éternel très répandu, s'y ajoutera à partir du 1er janvier 2027.", src: "Agra, d'après le Journal officiel", url: "https://www.agra.fr/lives/pesticidespfas-le-tfa-integrera-le-controle-sanitaire-de-leau-potable-en-2027-jo" },
-  { date: "23 janvier 2025", tag: "Étude", titre: "Des PFAS trouvés dans 29 communes sur 30 testées", txt: "UFC-Que Choisir et Générations futures ont analysé l'eau de 30 communes. Le TFA est présent dans 24 échantillons, mais les autres PFAS restent sous la limite française de 100 ng/L.", src: "UFC-Que Choisir", url: "https://www.quechoisir.org/action-ufc-que-choisir-polluants-eternels-dans-l-eau-du-robinet-une-large-presence-detectee-dans-96-des-communes-testees-n148808" },
+  { slug: "pfas-facture-eau", iso: "2026-02-10", date: "10 février 2026", tag: "Réglementation",
+    titre: "Le contrôle des polluants éternels arrive sur la facture d'eau",
+    txt: "Depuis janvier 2026, la recherche de 20 PFAS est obligatoire dans l'eau potable. Les collectivités financent ces analyses et en répercutent le coût sur les abonnés : environ 40 à 50 € hors taxes par analyse selon la FNCCR.",
+    chiffre: ["40 à 50 €", "hors taxes par analyse des 20 PFAS, contre 300 à 600 € il y a quelques années"],
+    corps: [
+      "Depuis janvier 2026, la recherche de 20 PFAS, les « polluants éternels », est obligatoire dans l'eau du robinet, en application de la directive européenne sur l'eau potable. Ce sont les collectivités qui paient ces analyses, et leur coût est répercuté sur la facture d'eau des abonnés.",
+      "Selon la FNCCR, la fédération qui représente les collectivités chargées de l'eau, analyser la somme des 20 PFAS coûte de 40 à 50 € hors taxes, les 20 substances étant recherchées en même temps. Il y a quelques années, la même analyse coûtait de 300 à 600 €.",
+      "La fréquence des analyses va d'une tous les deux ans à une par mois, voire plus, selon le volume d'eau distribué et son origine. Les prélèvements se font sur l'eau brute et au point de distribution.",
+      "Le TFA, le polluant éternel le plus répandu, s'ajoutera aux analyses au 1er janvier 2027. Son analyse coûte aujourd'hui plus de 100 € ; la FNCCR s'attend à une baisse quand elle deviendra courante.",
+    ],
+    pourVous: "Le surcoût pour chaque foyer n'est pas chiffré : il dépend du nombre d'analyses faites sur votre réseau. En revanche, leurs résultats sont publics : ils alimentent le critère « Polluants éternels » de votre commune sur Eau Arena.",
+    sources: [["Weka, d'après l'AFP", "https://www.weka.fr/actualite/sante/article/detection-des-pfas-une-nouvelle-ligne-dans-la-facture-d-eau-210502/"], ["L'Info Durable", "https://www.linfodurable.fr/economie/detection-des-pfas-une-nouvelle-ligne-dans-la-facture-deau-54450"]],
+    data: "pfasCount" },
+  { slug: "arrete-pfas-tfa-2027", iso: "2025-12-24", date: "24 décembre 2025", tag: "Réglementation",
+    titre: "Un arrêté fixe la liste des polluants éternels à rechercher",
+    txt: "Paru au Journal officiel, il rend obligatoire la recherche de 20 PFAS dans l'eau du robinet à partir du 12 janvier 2026. Le TFA, un polluant éternel très répandu, s'y ajoutera à partir du 1er janvier 2027.",
+    chiffre: ["1er janvier 2027", "date à laquelle le TFA, le polluant éternel le plus répandu, entre dans le contrôle"],
+    corps: [
+      "Un arrêté paru au Journal officiel rend obligatoire la recherche de 20 PFAS dans l'eau du robinet à partir du 12 janvier 2026, avec une limite de 0,1 µg/L pour leur somme. Les agences régionales de santé les recherchent désormais lors du contrôle sanitaire.",
+      "Sur recommandation de l'Anses, le gouvernement a ajouté à la liste le TFA (acide trifluoroacétique), le polluant éternel le plus répandu, ainsi que le 6:2 FTSA. Leur recherche ne sera obligatoire qu'à partir du 1er janvier 2027.",
+      "Pour le TFA, la France retient une valeur sanitaire indicative de 60 µg/L, comme l'Allemagne, et se fixe un objectif plus protecteur de 10 µg/L. Les Pays-Bas ont retenu un seuil de 2,2 µg/L.",
+      "L'Anses a trouvé du TFA dans 92 % des quelque 600 prélèvements d'eau brute et autant d'eau du robinet qu'elle a analysés.",
+    ],
+    pourVous: "Tant que le TFA n'est pas recherché partout, le critère « Polluants éternels » d'Eau Arena porte sur la somme des 20 PFAS. Les résultats du TFA seront ajoutés au fil des analyses à partir de 2027.",
+    sources: [["Agra, d'après le Journal officiel", "https://www.agra.fr/lives/pesticidespfas-le-tfa-integrera-le-controle-sanitaire-de-leau-potable-en-2027-jo"], ["L'Info Durable", "https://www.linfodurable.fr/le-tfa-ce-polluant-eternel-omnipresent-dans-lenvironnement-bientot-mieux-controle-54075"]],
+    data: "pfasCount" },
+  { slug: "ufc-que-choisir-pfas-30-communes", iso: "2025-01-23", date: "23 janvier 2025", tag: "Étude",
+    titre: "Des PFAS trouvés dans 29 communes sur 30 testées",
+    txt: "UFC-Que Choisir et Générations futures ont analysé l'eau de 30 communes. Le TFA est présent dans 24 échantillons, mais les autres PFAS restent sous la limite française de 100 ng/L.",
+    chiffre: ["29 sur 30", "échantillons d'eau du robinet contenaient au moins un PFAS"],
+    corps: [
+      "UFC-Que Choisir et Générations futures ont fait analyser l'eau du robinet de 30 communes entre juin et novembre 2024 : de grandes villes (Paris, Lyon, Bordeaux, Toulouse, Rouen, Amiens), des petites villes, des villages et des communes proches d'usines de PFAS, comme Tavaux (Jura) et Moussac (Gard).",
+      "Des PFAS ont été trouvés dans 29 échantillons sur 30. Hors TFA, aucun ne dépassait la limite française de 100 ng/L (0,1 µg/L) pour la somme des 20 PFAS. Avec la future norme danoise, beaucoup plus stricte, la moitié des échantillons auraient été non conformes.",
+      "Le TFA était présent dans 24 échantillons, avec des valeurs allant jusqu'à 13 000 ng/L à Moussac et 6 200 ng/L dans le 10e arrondissement de Paris.",
+      "Les deux associations demandaient des normes plus protectrices, un meilleur contrôle des rejets industriels, l'interdiction des pesticides classés PFAS et la surveillance du TFA, qui sera contrôlé dans l'eau du robinet à partir de 2027.",
+    ],
+    pourVous: "Ces analyses ponctuelles datent de 2024. Depuis 2026, les agences régionales de santé mesurent les 20 PFAS partout en France : le résultat de votre commune est sur sa page.",
+    sources: [["UFC-Que Choisir", "https://www.quechoisir.org/action-ufc-que-choisir-polluants-eternels-dans-l-eau-du-robinet-une-large-presence-detectee-dans-96-des-communes-testees-n148808"], ["Banque des Territoires (Localtis)", "https://www.banquedesterritoires.fr/polluants-eternels-dans-leau-du-robinet-une-etude-ufc-que-choisirgenerations-futures-revele-une"]],
+    data: "ufcCities" },
 ];
-function hbars(title, sub, rows) {
-  return `<figure class="chart"><figcaption><h3>${title}</h3><p>${sub}</p></figcaption>
+export const INFOS = [
+  { slug: "qualite-eau-robinet-france", kind: "stack", titre: "La qualité de l'eau du robinet en France, commune par commune",
+    court: "Répartition des communes selon la note de leur eau, de A à E." },
+  { slug: "nitrates-grandes-villes", kind: "bars", j: 5, lim: "50 mg/L", crit: "nitrates", titre: "Nitrates dans l'eau du robinet des grandes villes",
+    court: "La valeur la plus haute mesurée dans les 15 villes les plus peuplées, comparée à la limite de santé." },
+  { slug: "pesticides-grandes-villes", kind: "bars", j: 6, lim: "0,5 µg/L", crit: "pesticides", titre: "Pesticides dans l'eau du robinet des grandes villes",
+    court: "Le total des pesticides le plus haut mesuré dans les 15 villes les plus peuplées, comparé à la limite." },
+  { slug: "pfas-grandes-villes", kind: "bars", j: 7, lim: "0,1 µg/L", crit: "polluants éternels (somme des 20 PFAS)", titre: "Polluants éternels (PFAS) dans l'eau du robinet des grandes villes",
+    court: "La somme des 20 PFAS la plus haute mesurée dans les 15 villes les plus peuplées, comparée à la limite." },
+];
+export const newsItem = (slug) => NEWS.find((n) => n.slug === slug) || INFOS.find((n) => n.slug === slug) || null;
+export const newsUrl = (slug) => `/actualites/${slug}/`;
+const ARROW = '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const EXT = '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+
+function hbars(title, sub, rows, tag = "h3") {
+  return `<figure class="chart"><figcaption>${title ? `<${tag}>${title}</${tag}>` : ""}${sub ? `<p>${sub}</p>` : ""}</figcaption>
     <div class="hb">${rows.map((r, i) => `<a class="hb-row" href="${cityUrl(r.nom, r.code)}"><span class="hb-n">${esc(r.nom)}</span><span class="hb-t">${r.p == null ? "<em>pas encore mesuré</em>" : `<b class="d-${r.k}" data-w="${Math.max(r.p > 0 ? 1.5 : 0, Math.min(r.p, 100))}" style="width:${Math.max(r.p > 0 ? 1.5 : 0, Math.min(r.p, 100))}%;transition-delay:${i * 50}ms"></b>`}<i class="hb-lim" aria-hidden="true"></i></span><span class="hb-v"${r.p == null ? "" : ` data-to="${r.p}" data-suf=" %" data-d="${i * 50}"`}>${r.p == null ? "—" : r.p + " %"}</span></a>`).join("")}</div>
     <p class="hb-foot"><i></i>limite de santé (100 %)</p></figure>`;
 }
-export function renderNews(idx, meta) {
-  const big = idx.filter((r) => r[2]).slice(0, 15);
-  const mk = (j) => big.map((r) => ({ code: r[0], nom: r[1], p: r[j] < 0 ? null : r[j], k: r[j] < 0 ? "na" : r[j] > 100 ? "bad" : r[j] > 80 ? "warn" : "ok" })).sort((a, b) => (b.p ?? -1) - (a.p ?? -1));
+const pctRow = (r, j) => ({ code: r[0], nom: r[1], p: r[j] < 0 ? null : r[j], k: r[j] < 0 ? "na" : r[j] > 100 ? "bad" : r[j] > 80 ? "warn" : "ok" });
+const bigRows = (idx, j) => idx.filter((r) => r[2]).slice(0, 15).map((r) => pctRow(r, j)).sort((a, b) => (b.p ?? -1) - (a.p ?? -1));
+function stackFig(meta, title = "", tag = "h3") {
   const total = LETTERS.reduce((s, L) => s + (meta.dist[L] || 0), 0);
+  return `<figure class="chart wide"><figcaption>${title ? `<${tag}>${title}</${tag}>` : ""}<p>Répartition des ${fmtInt(total)} communes notées, selon leur réseau principal.</p></figcaption>
+    <div class="stack" role="img" aria-label="${LETTERS.map((L) => `${meta.dist[L] || 0} communes en ${L}`).join(", ")}">${LETTERS.map((L, i) => `<span class="g-${L}" data-w="${((meta.dist[L] || 0) / total) * 100}" style="width:${((meta.dist[L] || 0) / total) * 100}%;transition-delay:${i * 90}ms"></span>`).join("")}</div>
+    <div class="stack-leg">${LETTERS.map((L) => `<span>${gr(L)}<b data-to="${Math.round(((meta.dist[L] || 0) / total) * 100)}" data-suf=" %">${Math.round(((meta.dist[L] || 0) / total) * 100)} %</b><small>${SHORT[L]}</small></span>`).join("")}</div>
+  </figure>`;
+}
+const period = (meta) => `de ${moisFr(meta.start)} à ${moisFr(meta.end)}`;
+
+// Aperçu miniature d'une infographie, pour sa carte
+function infoMini(it, idx, meta) {
+  if (it.kind === "stack") {
+    const total = LETTERS.reduce((s, L) => s + (meta.dist[L] || 0), 0);
+    return `<span class="mini-stack" aria-hidden="true">${LETTERS.map((L) => `<i class="g-${L}" style="width:${((meta.dist[L] || 0) / total) * 100}%"></i>`).join("")}</span>`;
+  }
+  return `<span class="mini-bars" aria-hidden="true">${bigRows(idx, it.j).slice(0, 4).map((r) => `<span><em>${esc(r.nom)}</em><i><b class="d-${r.k}" style="width:${r.p == null ? 0 : Math.max(2, Math.min(r.p, 100))}%"></b></i></span>`).join("")}</span>`;
+}
+
+export function renderNews(idx, meta) {
   return `<section class="deep"><div class="wrap rk-hero">
       <h1>Actualités</h1>
       <p class="rk-sub">Ce qui change pour l'eau du robinet, et ce que disent les analyses, en chiffres et en images.</p>
     </div></section>
     <div class="wrap rk-body">
       <h2 class="rk-h2">Infographies</h2>
-      <figure class="chart wide"><figcaption><h3>La qualité de l'eau en France, commune par commune</h3><p>Répartition des ${fmtInt(total)} communes notées, selon leur réseau principal.</p></figcaption>
-        <div class="stack" role="img" aria-label="${LETTERS.map((L) => `${meta.dist[L] || 0} communes en ${L}`).join(", ")}">${LETTERS.map((L, i) => `<span class="g-${L}" data-w="${((meta.dist[L] || 0) / total) * 100}" style="width:${((meta.dist[L] || 0) / total) * 100}%;transition-delay:${i * 90}ms"></span>`).join("")}</div>
-        <div class="stack-leg">${LETTERS.map((L) => `<span>${gr(L)}<b data-to="${Math.round(((meta.dist[L] || 0) / total) * 100)}" data-suf=" %">${Math.round(((meta.dist[L] || 0) / total) * 100)} %</b><small>${SHORT[L]}</small></span>`).join("")}</div>
-      </figure>
-      <div class="charts">
-        ${hbars("Nitrates dans les grandes villes", "Valeur la plus haute en 15 mois, en part de la limite de 50 mg/L. Les 15 villes les plus peuplées.", mk(5))}
-        ${hbars("Polluants éternels dans les grandes villes", "Somme des 20 PFAS, valeur la plus haute, en part de la limite de 0,1 µg/L.", mk(7))}
-      </div>
-      <p class="cmp-leg">Calculé à partir du contrôle sanitaire des agences régionales de santé, de ${moisFr(meta.start)} à ${moisFr(meta.end)}.</p>
+      <div class="icards">${INFOS.map((it) => `<a class="icard" href="${newsUrl(it.slug)}">${infoMini(it, idx, meta)}<h3>${it.titre}</h3><p>${it.court}</p><span class="more">Voir l'infographie${ARROW}</span></a>`).join("")}</div>
       <h2 class="rk-h2" style="margin-top:48px">Actualités</h2>
-      <div class="news">${NEWS.map((n) => `<article class="ncard"><div class="nmeta"><span class="ntag">${n.tag}</span><time>${n.date}</time></div><h3>${n.titre}</h3><p>${n.txt}</p><a href="${n.url}" target="_blank" rel="noopener">Source : ${n.src}<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a></article>`).join("")}</div>
+      <div class="news">${NEWS.map((n) => `<a class="ncard" href="${newsUrl(n.slug)}"><div class="nmeta"><span class="ntag">${n.tag}</span><time datetime="${n.iso}">${n.date}</time></div><h3>${n.titre}</h3><p class="nkey"><b>${n.chiffre[0]}</b> ${n.chiffre[1]}</p><p>${n.txt}</p><span class="more">Lire l'article${ARROW}</span></a>`).join("")}</div>
+      <p class="cmp-leg">Infographies calculées à partir du contrôle sanitaire des agences régionales de santé, ${period(meta)}.</p>
     </div>`;
+}
+
+// Encadré « Ce que disent nos données », propre à chaque actualité
+function newsData(n, idx, meta) {
+  if (n.data === "pfasCount") {
+    const noted = idx.filter((r) => r[2]);
+    const m = noted.filter((r) => r[7] >= 0);
+    const over = m.filter((r) => r[7] > 100).length, half = m.filter((r) => r[7] >= 50).length;
+    return `<p>Sur les ${fmtInt(noted.length)} communes suivies par Eau Arena, <b>${fmtInt(m.length)}</b> ont déjà au moins une analyse des 20 PFAS ${period(meta)}. ${fmtInt(over)} dépassent la limite de 0,1 µg/L au moins une fois, et ${fmtInt(half)} atteignent la moitié de la limite.</p>
+      <p><a class="inl" href="${newsUrl("pfas-grandes-villes")}">Voir les polluants éternels dans les grandes villes${ARROW}</a></p>`;
+  }
+  if (n.data === "ufcCities") {
+    const byCode = new Map(idx.map((r) => [r[0], r]));
+    const rows = UFC_VILLES.map(([c]) => byCode.get(c)).filter(Boolean).map((r) => pctRow(r, 7)).sort((a, b) => (b.p ?? -1) - (a.p ?? -1));
+    return `<p>Les six grandes villes de l'étude, d'après le contrôle sanitaire officiel ${period(meta)} : somme des 20 PFAS, valeur la plus haute, en part de la limite de 0,1 µg/L (hors TFA).</p>${hbars("", "", rows)}`;
+  }
+  return "";
+}
+
+function infoBody(it, idx, meta) {
+  if (it.kind === "stack") {
+    const total = LETTERS.reduce((s, L) => s + (meta.dist[L] || 0), 0);
+    const pc = (L) => Math.round(((meta.dist[L] || 0) / total) * 100);
+    return `${stackFig(meta)}
+      <h2>Ce qu'il faut retenir</h2>
+      <p>${pc("A") + pc("B")} % des communes ont une eau notée A ou B (${pc("A")} % et ${pc("B")} %). À l'autre bout, ${fmtInt(meta.dist.E || 0)} communes, soit ${pc("E")} %, ont une note E : une limite de santé a été dépassée au moins une fois ${period(meta)}, ou plusieurs critères en sont proches.</p>
+      <p>Aujourd'hui, la plupart des notes E viennent des pesticides, puis des nitrates, des microbes et des polluants éternels. Une note E ne veut pas toujours dire que l'eau est interdite : sur chaque page de commune, l'avis de l'agence régionale de santé dit si l'on peut la boire.</p>
+      <h2>Comment lire cette infographie</h2>
+      <p>Chaque commune prend la note de son réseau principal, celui qui reçoit le plus de contrôles. La note part de 10 points, retire des points selon la part de la limite atteinte pour les nitrates, les pesticides et les polluants éternels, et 2 points par prélèvement où l'on a trouvé des microbes.</p>
+      <p><a class="inl" href="/classement/">Voir le classement des communes${ARROW}</a></p>`;
+  }
+  const rows = bigRows(idx, it.j);
+  const mes = rows.filter((r) => r.p != null), top = mes[0];
+  const over = mes.filter((r) => r.p > 100), half = mes.filter((r) => r.p >= 50);
+  const names = (a) => a.map((r) => r.nom).join(", ").replace(/, ([^,]*)$/, " et $1");
+  return `${hbars("", `Valeur la plus haute ${period(meta)}, en part de la limite de ${it.lim}. Les 15 villes les plus peuplées.`, rows)}
+    <h2>Ce qu'il faut retenir</h2>
+    <p>${top ? `C'est à ${esc(top.nom)} que la valeur la plus haute a été mesurée : ${top.p} % de la limite. ` : ""}${over.length ? `${over.length === 1 ? "Une ville dépasse" : `${over.length} villes dépassent`} la limite au moins une fois : ${esc(names(over))}.` : "Aucune de ces villes ne dépasse la limite."} ${half.length ? `${half.length === 1 ? "Une ville atteint" : `${half.length} villes atteignent`} au moins la moitié de la limite.` : "Toutes restent sous la moitié de la limite."}${rows.length - mes.length ? ` ${rows.length - mes.length === 1 ? "Une ville n'a" : `${rows.length - mes.length} villes n'ont`} pas encore d'analyse sur la période.` : ""}</p>
+    <h2>Comment lire cette infographie</h2>
+    <p>Chaque barre montre la valeur la plus haute mesurée pour les ${it.crit}, rapportée à la limite de santé (${it.lim}) : 100 % correspond à la limite. On retient le maximum plutôt qu'une moyenne, car c'est lui qui dit si la limite a été approchée. Touchez une ville pour voir le détail de son eau.</p>`;
+}
+
+export function renderNewsItem(slug, idx, meta) {
+  const n = newsItem(slug);
+  if (!n) return "";
+  const isInfo = !n.corps;
+  const crumbs = `<nav class="crumbs" aria-label="Fil d'Ariane"><a href="/">Accueil</a><span aria-hidden="true">›</span><a href="/actualites/">Actualités</a><span aria-hidden="true">›</span><span>${isInfo ? "Infographie" : n.tag}</span></nav>`;
+  const others = (isInfo ? INFOS : NEWS).filter((x) => x.slug !== slug);
+  const head = `<section class="deep"><div class="wrap rk-hero art-hero">${crumbs}
+      ${isInfo ? "" : `<div class="nmeta on-deep"><span class="ntag">${n.tag}</span><time datetime="${n.iso}">${n.date}</time></div>`}
+      <h1>${n.titre}</h1>
+      <p class="rk-sub">${isInfo ? n.court : n.txt}</p>
+    </div></section>`;
+  const cta = `<div class="art-cta"><p><b>Et chez vous ?</b> La note, les nitrates, les pesticides et les polluants éternels de votre commune.</p><a class="btn-cta" href="/">Voir l'eau de ma commune${ARROW}</a></div>`;
+  if (isInfo) {
+    return `${head}<div class="wrap art">
+      <div class="art-main">${infoBody(n, idx, meta)}${cta}
+        <p class="cmp-leg">Source : contrôle sanitaire des eaux distribuées, ministère de la Santé et agences régionales de santé (data.gouv.fr, Licence Ouverte), ${period(meta)}.</p></div>
+      <aside class="art-more"><h2 class="rk-h2">Autres infographies</h2><div class="icards">${others.map((it) => `<a class="icard" href="${newsUrl(it.slug)}">${infoMini(it, idx, meta)}<h3>${it.titre}</h3><span class="more">Voir l'infographie${ARROW}</span></a>`).join("")}</div></aside>
+    </div>`;
+  }
+  const data = newsData(n, idx, meta);
+  return `${head}<div class="wrap art">
+    <div class="art-main">
+      <div class="art-key"><b>${n.chiffre[0]}</b><span>${n.chiffre[1]}</span></div>
+      <h2>Ce qu'il faut retenir</h2>
+      ${n.corps.map((p) => `<p>${p}</p>`).join("")}
+      <h2>Ce que ça change pour vous</h2>
+      <p>${n.pourVous}</p>
+      ${data ? `<h2>Ce que disent les analyses officielles</h2>${data}` : ""}
+      ${cta}
+      <h2>Sources</h2>
+      <ul class="art-src">${n.sources.map(([t, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${t}${EXT}</a></li>`).join("")}</ul>
+    </div>
+    <aside class="art-more"><h2 class="rk-h2">Autres actualités</h2><div class="news">${others.map((o) => `<a class="ncard" href="${newsUrl(o.slug)}"><div class="nmeta"><span class="ntag">${o.tag}</span><time datetime="${o.iso}">${o.date}</time></div><h3>${o.titre}</h3><span class="more">Lire l'article${ARROW}</span></a>`).join("")}</div></aside>
+  </div>`;
+}
+
+// Données structurées d'une actualité (schema.org), pour Google
+export function newsJsonLd(slug, site, meta) {
+  const n = newsItem(slug);
+  if (!n || !site) return null;
+  const url = site + newsUrl(slug);
+  const crumbs = { "@type": "BreadcrumbList", itemListElement: [["Accueil", site + "/"], ["Actualités", site + "/actualites/"], [n.titre, url]].map(([name, item], i) => ({ "@type": "ListItem", position: i + 1, name, item })) };
+  const art = { "@type": "Article", headline: n.titre, description: n.txt || n.court, mainEntityOfPage: url, inLanguage: "fr-FR", image: site + "/og.png",
+    datePublished: n.iso || meta.end, dateModified: n.iso || meta.generated || meta.end, author: { "@type": "Organization", name: "Eau Arena", url: site + "/" }, publisher: { "@type": "Organization", name: "Eau Arena", url: site + "/" } };
+  return { "@context": "https://schema.org", "@graph": [art, crumbs] };
 }
 
 // ---------- À propos ----------
@@ -461,6 +613,7 @@ export function renderAbout(meta) {
 }
 
 // ---------- Titres et descriptions pour Google ----------
+const cut = (t, n) => (t.length <= n ? t : t.slice(0, t.lastIndexOf(" ", n - 1)) + "…");
 export function seo(kind, x) {
   const y = x?.year || "";
   switch (kind) {
@@ -469,6 +622,7 @@ export function seo(kind, x) {
       desc: x.L ? `L'eau du robinet à ${x.nom} est-elle bonne ? Note ${x.L}, nitrates, pesticides, polluants éternels (PFAS), microbes : les analyses officielles expliquées simplement.` : `Qualité de l'eau du robinet à ${x.nom} : analyses officielles du contrôle sanitaire.` };
     case "rank": return { title: `Classement de l'eau du robinet ${y} : les meilleures et les moins bonnes communes`, desc: "Où l'eau du robinet est-elle la meilleure ? Classement national des communes selon les analyses officielles : microbes, nitrates, pesticides, polluants éternels." };
     case "news": return { title: "Eau du robinet : actualités et infographies sur les PFAS et les nitrates", desc: "Contrôle des polluants éternels, nitrates dans les grandes villes, répartition des notes : l'actualité de l'eau du robinet en chiffres." };
+    case "newsItem": { const n = newsItem(x.slug); return { title: n.titre, desc: cut(n.txt || `${n.court} Valeurs officielles du contrôle sanitaire, ville par ville.`, 160) }; }
     case "about": return { title: "Pourquoi ce site ? Méthode et sources", desc: "Comment Eau Arena lit les analyses officielles de l'eau du robinet : critères, limites de santé, note de A à E." };
     default: return { title: "Mon eau du robinet est-elle bonne ? Qualité de l'eau par commune", desc: "Renseignez votre commune : une réponse simple et une note de A à E, d'après les analyses officielles de l'eau du robinet. Nitrates, pesticides, PFAS." };
   }
