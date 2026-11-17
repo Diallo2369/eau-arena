@@ -42,7 +42,7 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
   <a class="skip" href="#app">Aller au contenu</a>
   <header class="deep bar">
     <div class="wrap">
-      <a class="logo" href="/" aria-label="Eau Arena, accueil"><i aria-hidden="true"></i>Eau Arena</a>
+      <a class="logo" href="/" aria-label="Eau Arena, accueil"><i aria-hidden="true"></i><span>Eau</span><span class="ar">Arena</span></a>
       <nav aria-label="Menu" class="topnav">
         {nav.map(([k, href, label]) => <a href={href} data-nav={k} aria-current={k === page ? "page" : "false"}>{label}</a>)}
       </nav>
@@ -51,7 +51,7 @@ const nav = [["home", "/", "Accueil"], ["rank", "/classement/", "Classement"], [
     </div>
   </header>
   <div class="mnav" id="mnav" hidden>
-    <div class="mnav-top"><span class="logo"><i aria-hidden="true"></i>Eau Arena</span><button type="button" class="pop-x" id="menuX" aria-label="Fermer le menu"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="mnav-top"><span class="logo" aria-label="Eau Arena"><i aria-hidden="true"></i><span>Eau</span><span class="ar">Arena</span></span><button type="button" class="pop-x" id="menuX" aria-label="Fermer le menu"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <nav aria-label="Menu principal">{nav.map(([k, href, label]) => <a href={href} data-nav={k}>{label}</a>)}</nav>
   </div>
   <div class="sov" id="sov" role="dialog" aria-modal="true" aria-label="Rechercher une commune" hidden>
