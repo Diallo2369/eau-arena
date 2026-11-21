@@ -15,6 +15,44 @@ const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let indexP = null;
 let deps = {};
 const loadIndex = () => (indexP ||= fetch("/data/index.json").then((r) => { if (!r.ok) throw r; return r.json(); }).then((j) => { deps = j.deps; return j.c; }).catch((e) => { indexP = null; throw e; }));
+let cpP = null;
+const loadCp = () => (cpP ||= fetch("/data/cp.json").then((r) => { if (!r.ok) throw r; return r.json(); }).catch((e) => { cpP = null; throw e; }));
+// Comparaison souple : sans accents, tirets et apostrophes traités comme des espaces (« saint etienne » = « Saint-Étienne »)
+const flat = (s) => norm(s).replace(/[-'’.,]/g, " ").replace(/\s+/g, " ").trim();
+let flatNames = null;
+// Recherche : nom (début puis milieu), code INSEE, code postal, ou adresse complète (« 1 rue … 22830 Plouasne »)
+async function findCommunes(raw, idx) {
+  const n = flat(raw);
+  if (!n) return [];
+  flatNames ||= idx.map((r) => flat(r[1]));
+  const zip = n.match(/(?:^|\s)(\d{5})(?:\s|$)/);
+  const words = zip ? n.replace(zip[1], " ").replace(/\s+/g, " ").trim() : n;
+  if (zip) {
+    let rows = [];
+    try { const cp = await loadCp(); const set = new Set(cp[zip[1]] || []); rows = idx.filter((r) => set.has(r[0])); } catch {}
+    if (!rows.length) rows = idx.filter((r) => r[0] === zip[1].toUpperCase());
+    if (words && rows.length > 1) {
+      const pad = ` ${words} `;
+      rows.sort((a, b) => (pad.includes(` ${flat(b[1])} `) - pad.includes(` ${flat(a[1])} `)));
+    }
+    if (rows.length) return rows.slice(0, 8);
+  }
+  const starts = [], contains = [];
+  for (let i = 0; i < idx.length; i++) {
+    const r = idx[i], k = flatNames[i];
+    if (k.startsWith(words) || r[0].startsWith(words.toUpperCase())) starts.push(r); else if (words.length > 2 && k.includes(words)) contains.push(r);
+    if (starts.length >= 8) break;
+  }
+  let items = starts.concat(contains).slice(0, 8);
+  if (!items.length && words.includes(" ")) {
+    // Adresse complète : on cherche les noms de commune contenus dans le texte, les plus longs d'abord
+    const pad = ` ${words} `, found = [];
+    for (let i = 0; i < idx.length; i++) if (flatNames[i].length > 2 && pad.includes(` ${flatNames[i]} `)) found.push(i);
+    found.sort((a, b) => flatNames[b].length - flatNames[a].length || idx[b][8] - idx[a][8]);
+    items = found.slice(0, 8).map((i) => idx[i]);
+  }
+  return items;
+}
 const depP = {};
 const loadDep = (dep) => (depP[dep] ||= fetch(`/data/dep/${dep}.json`).then((r) => { if (!r.ok) throw r; return r.json(); }).catch((e) => { delete depP[dep]; throw e; }));
 const codeFromPath = (p) => { const m = p.match(/^\/eau\/[a-z0-9-]*-([0-9a-z]{5})\/$/); return m ? m[1].toUpperCase() : null; };
@@ -143,16 +181,12 @@ function bindSearch(root = $(".hero-s [data-search]"), onPick) {
     let idx;
     try { idx = await loadIndex(); } catch { sg.innerHTML = '<p class="empty">Recherche indisponible pour le moment. Réessayez dans un instant.</p>'; sg.hidden = false; return; }
     if (norm(q.value.trim()) !== n) return;
-    const starts = [], contains = [];
-    for (const r of idx) {
-      const k = norm(r[1]);
-      if (k.startsWith(n) || r[0].startsWith(n)) starts.push(r); else if (n.length > 2 && k.includes(n)) contains.push(r);
-      if (starts.length >= 8) break;
-    }
-    items = starts.concat(contains).slice(0, 8);
+    const found = await findCommunes(q.value, idx);
+    if (norm(q.value.trim()) !== n) return;
+    items = found;
     act = Math.min(act, items.length - 1);
     sg.innerHTML = items.length ? items.map((r, i) => `<a role="option" class="${i === act ? "active" : ""}" href="${cityUrl(r[1], r[0])}" aria-selected="${i === act}"><span class="n"><b>${esc(r[1])}${alertTag(r[9])}</b><span>${depLabel(r[0])}</span></span>${gr(r[2] || null)}</a>`).join("")
-      : '<p class="empty">Aucune commune ne correspond. Vérifiez l\'orthographe ou tapez le code postal de la commune.</p>';
+      : '<p class="empty">Aucune commune ne correspond. Vérifiez l\'orthographe, ou tapez le code postal ou l\'adresse complète.</p>';
     sg.hidden = false; q.setAttribute("aria-expanded", "true");
     if (items[0]) loadDep(depOf(items[Math.max(act, 0)][0])).catch(() => {});
   };

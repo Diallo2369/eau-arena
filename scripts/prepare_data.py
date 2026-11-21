@@ -295,6 +295,14 @@ def main():
                    "deps": {k: deps[k] for k in sorted({c["dep"] for c in communes.values()}) if k in deps}, "c": index},
                   f, ensure_ascii=False, separators=(",", ":"))
 
+    # Codes postaux -> communes (recherche par code postal ou par adresse complète), chargé à la demande
+    cp = defaultdict(list)
+    for code in communes:
+        for z in (names[code].get("codesPostaux") or []):
+            cp[z].append(code)
+    with open(os.path.join(PUBLIC, "cp.json"), "w", encoding="utf-8") as f:
+        json.dump(cp, f, ensure_ascii=False, separators=(",", ":"))
+
     # Détail par département
     by_dep = defaultdict(lambda: {"c": {}, "u": {}})
     for c in communes.values():
